@@ -26,11 +26,12 @@ body {
     border-radius: 20px;
     box-shadow: 0 14px 28px rgba(0,0,0,0.1), 0 10px 10px rgba(0,0,0,0.1);
     position: relative;
-    left: -35%;
-    width: 850px;
+    left: -55%;
+    width: 700px;
     max-width: 100%;
-    min-height: 520px;
+    min-height: 400px;
     overflow: hidden;
+    transform: translateY(-60px);
 }
 
 /* --- FORMULARIOS --- */

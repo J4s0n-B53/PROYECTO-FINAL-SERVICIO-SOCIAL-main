@@ -3,7 +3,6 @@ const db = require('../config/database');
 const login = async (req, res) => {
     const { correo, password } = req.body;
     try {
-        // Consulta usando Sequelize (compatible con MySQL)
         const [results] = await db.query(
             "SELECT * FROM usuarios WHERE correo_institucional = ?", 
             { replacements: [correo] }
@@ -18,9 +17,15 @@ const login = async (req, res) => {
             return res.status(401).json({ mensaje: "Contraseña incorrecta" });
         }
 
+        // --- CAMBIO AQUÍ PARA QUE COINCIDA CON TU FRONTEND ---
         res.json({
             mensaje: "¡Bienvenido!",
-            user: { id: user.id_usuario, nombre: user.nombre_completo, rol: user.rol }
+            user: { 
+                id_usuario: user.id_usuario, 
+                nombre_completo: user.nombre_completo, // Cambiado de 'nombre' a 'nombre_completo'
+                id_carrera: user.id_carrera, 
+                rol: user.rol 
+            }
         });
     } catch (err) {
         res.status(500).json({ mensaje: "Error de servidor", error: err.message });

@@ -2,14 +2,10 @@ import React, { useState } from 'react';
 import './Login.css';
 
 const Login = ({ onLoginSuccess }) => {
-    // Estado para la animación del panel
     const [isActive, setIsActive] = useState(false);
-    
-    // Estados para el login
     const [correo, setCorreo] = useState('');
     const [password, setPassword] = useState('');
 
-    // --- FUNCIÓN DE LOGIN ---
     const handleLoginSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -21,8 +17,18 @@ const Login = ({ onLoginSuccess }) => {
             const data = await res.json();
             
             if (res.ok) {
-                alert(`Bienvenido, ${data.user.nombre_completo}`);
-                if (onLoginSuccess) onLoginSuccess(data.user);
+                // 1. Verificamos que data.user existe antes de saludar
+                const usuario = data.user;
+                alert(`Bienvenido, ${usuario.nombre_completo}`);
+
+                // 2. GUARDADO CRÍTICO: Guardamos el ID de carrera en localStorage
+                // Esto permite que ListaOfertas lo lea aunque la prop se pierda
+                localStorage.setItem('id_carrera', usuario.id_carrera);
+                localStorage.setItem('token', data.token); // Por si usas JWT después
+
+                // 3. Notificamos al componente padre (App.jsx)
+                if (onLoginSuccess) onLoginSuccess(usuario);
+                
             } else {
                 alert(data.mensaje || "Error al iniciar sesión");
             }
@@ -32,16 +38,16 @@ const Login = ({ onLoginSuccess }) => {
         }
     };
 
-    // --- FUNCIÓN DE REGISTRO (AÑADIDA) ---
     const handleRegisterSubmit = async (e) => {
         e.preventDefault();
         
-        // Accedemos a los valores de los inputs del formulario de registro
+        // Forma más segura de obtener valores del formulario
+        const form = e.target;
         const datosRegistro = {
-            nombre_completo: e.target[0].value,
-            id_carrera: e.target[1].value,
-            correo_institucional: e.target[2].value,
-            password_hash: e.target[3].value
+            nombre_completo: form[0].value,
+            id_carrera: form[1].value,
+            correo_institucional: form[2].value,
+            password_hash: form[3].value
         };
 
         try {
@@ -55,7 +61,7 @@ const Login = ({ onLoginSuccess }) => {
 
             if (res.ok) {
                 alert("¡Registro exitoso! Ahora puedes iniciar sesión.");
-                setIsActive(false); // Mueve el panel al lado del Login (Azul)
+                setIsActive(false); 
             } else {
                 alert(data.mensaje || "Error al registrarse");
             }
@@ -67,14 +73,12 @@ const Login = ({ onLoginSuccess }) => {
 
     return (
         <div className={`container ${isActive ? "right-panel-active" : ""}`} id="container">
-            
             {/* Panel de Registro */}
             <div className="form-container sign-up-container">
                 <form onSubmit={handleRegisterSubmit}>
                     <h1>Crea una Cuenta</h1>
                     <input type="text" placeholder="Nombre Completo" required />
                     
-                    {/* Selector de Carrera */}
                     <select className="select-carrera" defaultValue="" required>
                         <option value="" disabled>Selecciona tu Carrera</option>
                         <option value="1">Lic. en Ciencias Jurídicas</option>
