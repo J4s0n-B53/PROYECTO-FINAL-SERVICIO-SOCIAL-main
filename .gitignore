@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+
+Backend/node_modules/
+Backend/.env
+Frontend/node_modules/
+Frontend/dist/
+
+.DS_Store
+Thumbs.db
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

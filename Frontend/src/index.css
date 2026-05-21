@@ -1,0 +1,35 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #f0f2f7;
+  --bg2:     #ffffff;
+  --bg3:     #e8eaf2;
+  --border:  rgba(10,27,78,0.10);
+  --border2: rgba(10,27,78,0.18);
+  --text:    #0d1b3e;
+  --text2:   #4a5578;
+  --text3:   #8d97b8;
+  --accent:  #0A1B4E;
+  --accent2: #122268;
+  --green:   #0f9e6e;
+  --amber:   #d48f0a;
+  --red:     #d93025;
+  --purple:  #6b3fa0;
+  --teal:    #0b8fa6;
+  --radius:  12px;
+  --radius-sm: 8px;
+  --shadow:  0 4px 24px rgba(10,27,78,0.10);
+  font-family: 'DM Sans', sans-serif;
+}
+
+body { background: var(--bg); color: var(--text); min-height: 100vh; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp .35s ease forwards; }
