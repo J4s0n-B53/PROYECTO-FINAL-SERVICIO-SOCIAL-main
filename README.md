@@ -1,4 +1,4 @@
-# SSE.USO - Sistema de Servicio Social
+# SSE.USO - Sistema de Servicio Social Estudiantil
 
 Proyecto web con backend en Node.js/Express, frontend en React/Vite y base de datos MySQL.
 
