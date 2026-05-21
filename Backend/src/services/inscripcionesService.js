@@ -101,8 +101,11 @@ async function cambiarEstado(id, estado) {
     if (!inscripcion) throw { status: 404, message: 'Inscripción no encontrada' };
 
     await conn.query(
-      'UPDATE inscripciones SET estado=? WHERE id_inscripcion=?',
-      [estado, id]
+      `UPDATE inscripciones
+       SET estado = ?,
+           fecha_acreditacion = CASE WHEN ? = 'finalizado' THEN CURRENT_TIMESTAMP ELSE fecha_acreditacion END
+       WHERE id_inscripcion = ?`,
+      [estado, estado, id]
     );
 
     if (estado === 'rechazado' && inscripcion.estado !== 'rechazado') {
@@ -140,7 +143,7 @@ async function acreditarHoras(id, horasAcreditadas) {
 
   await pool.query(
     `UPDATE inscripciones
-     SET horas_acreditadas = ?, estado = 'finalizado'
+     SET horas_acreditadas = ?, estado = 'finalizado', fecha_acreditacion = CURRENT_TIMESTAMP
      WHERE id_inscripcion = ?`,
     [horas, id]
   );

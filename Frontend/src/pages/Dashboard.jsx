@@ -140,15 +140,26 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
 export default function Dashboard() {
   const [inscripciones, setInscripciones] = useState([]);
   const [ofertas,       setOfertas]       = useState([]);
+  const [usuarios,      setUsuarios]      = useState([]);
+  const [carreras,      setCarreras]      = useState([]);
   const [loading,       setLoading]       = useState(true);
   const [loadingRep,    setLoadingRep]    = useState(null);
+  const [queryCompletos, setQueryCompletos] = useState('');
+  const [carreraCompletos, setCarreraCompletos] = useState('');
   const { toast, show } = useToast();
 
   async function load() {
     try {
-      const [i, o] = await Promise.all([api.get('/inscripciones'), api.get('/ofertas')]);
+      const [i, o, u, c] = await Promise.all([
+        api.get('/inscripciones'),
+        api.get('/ofertas'),
+        api.get('/usuarios'),
+        api.get('/carreras')
+      ]);
       setInscripciones(i.data);
       setOfertas(o.data);
+      setUsuarios(u.data);
+      setCarreras(c.data);
     } catch { show('Error al cargar datos', 'error'); }
     finally { setLoading(false); }
   }
@@ -181,27 +192,21 @@ export default function Dashboard() {
   const finalizados= inscripciones.filter(i => i.estado === 'finalizado').length;
   const recientes  = [...inscripciones].slice(0, 8);
 
-  // Calcula horas finalizadas por estudiante y filtra los que llegaron a 500h
-  const horasPorEstudiante = {};
-  const nombrePorEstudiante = {};
-  const correoPorEstudiante = {};
-
-  inscripciones.forEach(i => {
-    if (i.estado === 'finalizado') {
-      horasPorEstudiante[i.id_estudiante]  = (horasPorEstudiante[i.id_estudiante] || 0) + (i.horas_acreditar || 0);
-      nombrePorEstudiante[i.id_estudiante] = i.estudiante_nombre;
-      correoPorEstudiante[i.id_estudiante] = i.correo_institucional;
-    }
+  const estudiantesCompletos = usuarios
+    .map(u => ({
+      id: u.id_usuario,
+      nombre: u.nombre_completo,
+      correo: u.correo_institucional,
+      carrera: u.nombre_carrera || '',
+      horas: Number(u.horas_acumuladas ?? 0),
+    }))
+    .filter(u => u.horas >= 500);
+  const estudiantesCompletosFiltrados = estudiantesCompletos.filter(est => {
+    const texto = `${est.nombre} ${est.correo}`.toLowerCase();
+    const coincideBusqueda = !queryCompletos || texto.includes(queryCompletos.trim().toLowerCase());
+    const coincideCarrera = !carreraCompletos || est.carrera === carreraCompletos;
+    return coincideBusqueda && coincideCarrera;
   });
-
-  const estudiantesCompletos = Object.entries(horasPorEstudiante)
-    .filter(([, h]) => h >= 500)
-    .map(([id, horas]) => ({
-      id: Number(id),
-      nombre: nombrePorEstudiante[id],
-      correo: correoPorEstudiante[id],
-      horas,
-    }));
 
   return (
     <>
@@ -270,6 +275,63 @@ export default function Dashboard() {
           )}
         </div>
 
+        {estudiantesCompletos.length > 0 && (
+          <div style={{
+            display:'grid',
+            gridTemplateColumns:'minmax(240px,1fr) minmax(220px,320px)',
+            gap:10,
+            marginBottom:16
+          }}>
+            <div style={{ position:'relative' }}>
+              <span style={{
+                position:'absolute',
+                left:12,
+                top:'50%',
+                transform:'translateY(-50%)',
+                fontSize:14,
+                color:'var(--text3)'
+              }}>⌕</span>
+              <input
+                value={queryCompletos}
+                onChange={e => setQueryCompletos(e.target.value)}
+                placeholder="Buscar estudiante..."
+                style={{
+                  width:'100%',
+                  background:'#fff',
+                  border:'1px solid rgba(10,27,78,.15)',
+                  borderRadius:8,
+                  padding:'9px 14px 9px 34px',
+                  fontFamily:'inherit',
+                  fontSize:13,
+                  color:'var(--text)',
+                  outline:'none',
+                  boxShadow:'0 1px 3px rgba(10,27,78,.06)'
+                }}
+              />
+            </div>
+            <select
+              value={carreraCompletos}
+              onChange={e => setCarreraCompletos(e.target.value)}
+              style={{
+                background:'#fff',
+                border:'1px solid rgba(10,27,78,.15)',
+                borderRadius:8,
+                padding:'9px 12px',
+                fontFamily:'inherit',
+                fontSize:13,
+                color:'#8d97b8',
+                outline:'none',
+                boxShadow:'0 1px 3px rgba(10,27,78,.06)'
+              }}
+            >
+              <option value="">Todas las carreras</option>
+              {carreras.map(carrera => (
+                <option key={carrera.id_carrera} value={carrera.nombre_carrera}>{carrera.nombre_carrera}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {estudiantesCompletos.length === 0 ? (
           /* Estado vacío */
           <div style={{
@@ -280,10 +342,18 @@ export default function Dashboard() {
             <div style={{ fontSize: 32, marginBottom: 10 }}>📋</div>
             Aún ningún estudiante ha completado las 500 horas de servicio social.
           </div>
+        ) : estudiantesCompletosFiltrados.length === 0 ? (
+          <div style={{
+            background: 'var(--bg2)', border: '1px dashed var(--border)',
+            borderRadius: 12, padding: '36px 24px', textAlign: 'center',
+            color: 'var(--text3)', fontSize: 13,
+          }}>
+            No hay estudiantes completados que coincidan con los filtros.
+          </div>
         ) : (
           /* Tarjetas de estudiantes completos */
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 14 }}>
-            {estudiantesCompletos.map(est => (
+            {estudiantesCompletosFiltrados.map(est => (
               <div key={est.id} style={{
                 background: 'var(--bg2)',
                 border: '1px solid rgba(15,206,138,.25)',
@@ -338,7 +408,7 @@ export default function Dashboard() {
                     letterSpacing: .3, transition: '.2s',
                   }}
                 >
-                  {loadingRep === est.id ? 'Generando…' : '📄 Descargar Constancia Global'}
+                  {loadingRep === est.id ? 'Generando…' : '📄 Descargar Constancia de Finalización'}
                 </button>
               </div>
             ))}

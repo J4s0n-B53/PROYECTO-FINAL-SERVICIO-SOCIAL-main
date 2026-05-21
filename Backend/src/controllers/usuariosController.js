@@ -18,4 +18,13 @@ async function getMe(req, res) {
   }
 }
 
-module.exports = { getAll, getMe };
+async function actualizarHorasManuales(req, res) {
+  try {
+    await usuariosService.actualizarHorasManuales(req.params.id, req.body.horas_manuales);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message || 'Error del servidor' });
+  }
+}
+
+module.exports = { getAll, getMe, actualizarHorasManuales };

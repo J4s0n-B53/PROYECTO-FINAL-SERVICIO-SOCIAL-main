@@ -32,6 +32,8 @@ CREATE TABLE usuarios (
     password_hash VARCHAR(255) NOT NULL,
     rol ENUM('estudiante', 'admin') DEFAULT 'estudiante',
     materias_aprobadas INT DEFAULT 0,
+    horas_manuales INT DEFAULT 0,
+    fecha_horas_manuales TIMESTAMP NULL,
     id_carrera INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_carrera)
@@ -65,6 +67,7 @@ CREATE TABLE inscripciones (
     fecha_inscripcion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     estado ENUM('pendiente', 'aceptado', 'finalizado', 'rechazado') DEFAULT 'pendiente',
     horas_acreditadas INT NULL,
+    fecha_acreditacion TIMESTAMP NULL,
     FOREIGN KEY (id_estudiante)
         REFERENCES usuarios(id_usuario),
     FOREIGN KEY (id_oferta)

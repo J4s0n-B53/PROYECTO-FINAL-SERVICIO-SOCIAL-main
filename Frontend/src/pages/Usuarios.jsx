@@ -8,14 +8,58 @@ export default function Usuarios() {
   const [query, setQuery] = useState('');
   const [carreraFiltro, setCarreraFiltro] = useState('');
   const [horasFiltro, setHorasFiltro] = useState('');
+  const [editandoHorasId, setEditandoHorasId] = useState(null);
+  const [horasManuales, setHorasManuales] = useState({});
+  const [savingHorasId, setSavingHorasId] = useState(null);
   const { toast, show } = useToast();
 
+  async function loadUsuarios() {
+    try {
+      const r = await api.get('/usuarios');
+      setUsuarios(r.data);
+      setHorasManuales(Object.fromEntries(
+        r.data.map(u => [u.id_usuario, Number(u.horas_manuales ?? 0)])
+      ));
+    } catch {
+      show('Error al cargar usuarios','error');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
-    api.get('/usuarios')
-      .then(r => setUsuarios(r.data))
-      .catch(() => show('Error al cargar usuarios','error'))
-      .finally(() => setLoading(false));
+    loadUsuarios();
   }, []);
+
+  function editarHoras(u) {
+    setHorasManuales(prev => ({ ...prev, [u.id_usuario]: Number(u.horas_manuales ?? 0) }));
+    setEditandoHorasId(u.id_usuario);
+  }
+
+  function cancelarHoras(u) {
+    setHorasManuales(prev => ({ ...prev, [u.id_usuario]: Number(u.horas_manuales ?? 0) }));
+    setEditandoHorasId(null);
+  }
+
+  async function confirmarHoras(u) {
+    const horas = Number(horasManuales[u.id_usuario] ?? 0);
+    if (!Number.isInteger(horas) || horas < 0 || horas > 500) {
+      show('Ingresa una cantidad válida entre 0 y 500 horas', 'error');
+      return;
+    }
+
+    setSavingHorasId(u.id_usuario);
+    try {
+      await api.patch(`/usuarios/${u.id_usuario}/horas-manuales`, { horas_manuales: horas });
+      show('Horas manuales actualizadas');
+      setEditandoHorasId(null);
+      await loadUsuarios();
+    } catch (e) {
+      show(e.response?.data?.error || 'Error al acreditar horas', 'error');
+    } finally {
+      setSavingHorasId(null);
+    }
+  }
 
   if (loading) return <Spinner />;
 
@@ -109,11 +153,14 @@ export default function Usuarios() {
       </div>
       <TableWrap>
         <thead><tr>
-          <Th>Nombre</Th><Th>Correo</Th><Th>Carrera</Th><Th>Facultad</Th><Th>Materias</Th><Th>Horas</Th><Th>Rol</Th>
+          <Th>Nombre</Th><Th>Correo</Th><Th>Carrera</Th><Th>Facultad</Th><Th>Materias</Th><Th>Horas</Th><Th>Acreditar horas</Th><Th>Rol</Th>
         </tr></thead>
         <tbody>
           {usuariosFiltrados.map(u => {
             const horas = Number(u.horas_acumuladas ?? u.total_horas ?? u.horas ?? 0);
+            const editando = editandoHorasId === u.id_usuario;
+            const saving = savingHorasId === u.id_usuario;
+            const esEstudiante = u.rol === 'estudiante';
 
             return (
             <tr key={u.id_usuario}>
@@ -135,13 +182,97 @@ export default function Usuarios() {
                   color: horas>=500 ? 'var(--green)' : 'var(--text2)'
                 }}>{horas}h</span>
               </Td>
+              <Td>
+                {esEstudiante ? (
+                  <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
+                    <input
+                      type="number"
+                      min="0"
+                      max="500"
+                      value={horasManuales[u.id_usuario] ?? 0}
+                      disabled={!editando || saving}
+                      onChange={e => setHorasManuales(prev => ({ ...prev, [u.id_usuario]: e.target.value }))}
+                      title="Horas manuales externas"
+                      style={{
+                        width:68,
+                        background: editando ? '#fff' : 'rgba(10,27,78,.04)',
+                        border:'1px solid rgba(10,27,78,.15)',
+                        borderRadius:6,
+                        padding:'6px 8px',
+                        fontFamily:'inherit',
+                        fontSize:12,
+                        color: editando ? 'var(--text)' : 'var(--text3)',
+                        outline:'none'
+                      }}
+                    />
+                    {editando ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => confirmarHoras(u)}
+                          disabled={saving}
+                          style={{
+                            border:'1px solid rgba(15,158,110,.30)',
+                            background:'rgba(15,158,110,.10)',
+                            color:'var(--green)',
+                            borderRadius:6,
+                            padding:'6px 9px',
+                            fontFamily:'inherit',
+                            fontSize:12,
+                            cursor: saving ? 'not-allowed' : 'pointer',
+                            opacity: saving ? .55 : 1
+                          }}
+                        >
+                          {saving ? 'Guardando...' : 'Confirmar'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => cancelarHoras(u)}
+                          disabled={saving}
+                          style={{
+                            border:'1px solid rgba(10,27,78,.18)',
+                            background:'none',
+                            color:'var(--text2)',
+                            borderRadius:6,
+                            padding:'6px 9px',
+                            fontFamily:'inherit',
+                            fontSize:12,
+                            cursor: saving ? 'not-allowed' : 'pointer'
+                          }}
+                        >
+                          Cancelar
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => editarHoras(u)}
+                        style={{
+                          border:'1px solid rgba(10,27,78,.18)',
+                          background:'none',
+                          color:'var(--text2)',
+                          borderRadius:6,
+                          padding:'6px 9px',
+                          fontFamily:'inherit',
+                          fontSize:12,
+                          cursor:'pointer'
+                        }}
+                      >
+                        Editar
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <span style={{ color:'var(--text3)' }}>—</span>
+                )}
+              </Td>
               <Td><Badge type={u.rol}>{u.rol}</Badge></Td>
             </tr>
             );
           })}
           {usuariosFiltrados.length === 0 && (
             <tr>
-              <Td style={{ textAlign:'center', padding:40, color:'var(--text3)' }} colSpan={7}>
+              <Td style={{ textAlign:'center', padding:40, color:'var(--text3)' }} colSpan={8}>
                 No hay usuarios que coincidan con los filtros.
               </Td>
             </tr>

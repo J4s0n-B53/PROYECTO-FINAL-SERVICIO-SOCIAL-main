@@ -8,4 +8,6 @@ router.get('/',    authMiddleware, adminOnly, usuariosController.getAll);
 // GET /api/usuarios/me — perfil propio
 router.get('/me',  authMiddleware,            usuariosController.getMe);
 
+router.patch('/:id/horas-manuales', authMiddleware, adminOnly, usuariosController.actualizarHorasManuales);
+
 module.exports = router;

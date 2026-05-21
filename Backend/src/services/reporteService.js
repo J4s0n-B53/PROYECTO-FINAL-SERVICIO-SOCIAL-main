@@ -4,7 +4,9 @@ const pool = require('../database/connection');
 async function getReporte(inscripcionId, estudianteId) {
   const [rows] = await pool.query(
     `SELECT
-       i.id_inscripcion, i.fecha_inscripcion, i.estado,
+       i.id_inscripcion,
+       COALESCE(i.fecha_acreditacion, i.fecha_inscripcion) AS fecha_inscripcion,
+       i.estado,
        u.nombre_completo, u.correo_institucional, u.materias_aprobadas,
        c.nombre_carrera, f.nombre_facultad,
        o.titulo AS oferta_titulo, o.descripcion AS oferta_descripcion,
@@ -27,7 +29,7 @@ async function getReporte(inscripcionId, estudianteId) {
 async function getReporteGlobal(estudianteId) {
   const [[estudiante]] = await pool.query(
     `SELECT u.id_usuario, u.nombre_completo, u.correo_institucional,
-            u.materias_aprobadas, u.created_at,
+            u.materias_aprobadas, u.horas_manuales, u.fecha_horas_manuales, u.created_at,
             c.nombre_carrera, f.nombre_facultad
      FROM usuarios u
      LEFT JOIN carreras   c ON u.id_carrera  = c.id_carrera
@@ -41,13 +43,23 @@ async function getReporteGlobal(estudianteId) {
   const [actividades] = await pool.query(
     `SELECT o.titulo, o.ubicacion, o.horario,
             COALESCE(i.horas_acreditadas, o.horas_acreditar) AS horas_acreditar,
-            i.fecha_inscripcion
+            COALESCE(i.fecha_acreditacion, i.fecha_inscripcion) AS fecha_inscripcion
      FROM inscripciones i
      JOIN ofertas o ON i.id_oferta = o.id_oferta
      WHERE i.id_estudiante = ? AND i.estado = 'finalizado'
-     ORDER BY i.fecha_inscripcion ASC`,
+     ORDER BY COALESCE(i.fecha_acreditacion, i.fecha_inscripcion) ASC`,
     [estudianteId]
   );
+
+  if ((estudiante.horas_manuales || 0) > 0) {
+    actividades.push({
+      titulo: 'Horas manuales acreditadas',
+      ubicacion: 'Actividad externa',
+      horario: 'No aplica',
+      horas_acreditar: estudiante.horas_manuales,
+      fecha_inscripcion: estudiante.fecha_horas_manuales || estudiante.created_at
+    });
+  }
 
   const totalHoras = actividades.reduce((a, i) => a + (i.horas_acreditar || 0), 0);
   const META = 500;

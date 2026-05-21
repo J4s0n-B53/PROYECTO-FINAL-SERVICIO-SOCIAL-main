@@ -156,11 +156,6 @@ export default function Ofertas() {
       <PageHeader
         title={isAdmin ? 'Gestión de ofertas' : 'Ofertas disponibles'}
         subtitle={isAdmin ? 'Crea, edita y administra las plazas disponibles' : 'Plazas abiertas para tu carrera y el sistema general'}
-        titleStyle={!isAdmin ? {
-          fontFamily: 'inherit',
-          fontWeight: 800,
-          letterSpacing: '-.5px'
-        } : undefined}
       />
 
       {isAdmin && (
