@@ -1,12 +1,20 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import api from '../services/apiClient';
 import { PageHeader, StatCard, TableWrap, Th, Td, Badge, Tag, Spinner, useToast, Toast } from '../components/UI';
 
-/* ── Generador de PDF — diseño constancia institucional ─────────────────── */
+/* Generador de PDF: constancia institucional */
 function generarPDF(d) {
   const fecha = new Date(d.fecha_inscripcion).toLocaleDateString('es-SV', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
+  const fechaInicio = d.fecha_inicio
+    ? new Date(d.fecha_inicio).toLocaleDateString('es-SV', { year: 'numeric', month: 'long', day: 'numeric' })
+    : '&mdash;';
+  const fechaFin = d.fecha_fin
+    ? new Date(d.fecha_fin).toLocaleDateString('es-SV', { year: 'numeric', month: 'long', day: 'numeric' })
+    : '&mdash;';
+  const horaInicio = d.hora_inicio ? String(d.hora_inicio).slice(0, 5) : '&mdash;';
+  const horaFin = d.hora_fin ? String(d.hora_fin).slice(0, 5) : '&mdash;';
   const hoy = new Date().toLocaleDateString('es-SV', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
@@ -83,17 +91,17 @@ function generarPDF(d) {
 
   <div class="body">
     <p class="doc-title">CONSTANCIA DE SERVICIO SOCIAL</p>
-    <p class="doc-sub">Documento oficial de acreditación — ${d.horas_acreditar} horas acreditadas</p>
+    <p class="doc-sub">Documento oficial de acreditaci&oacute;n &mdash; ${d.horas_acreditar} horas acreditadas</p>
 
-    <div class="badge"><span>✓ Servicio Social Completado</span></div>
+    <div class="badge"><span>&#10003; Servicio Social Completado</span></div>
 
     <p class="body-text">
-      La <strong>Universidad de Sonsonate</strong>, a través de la Coordinación de Servicio Social,
+      La <strong>Universidad de Sonsonate</strong>, a trav&eacute;s de la Coordinaci&oacute;n de Servicio Social,
       hace constar que el/la estudiante <strong>${d.nombre_completo}</strong>,
       con correo institucional <strong>${d.correo_institucional}</strong>, perteneciente a la carrera de
       <strong>${d.nombre_carrera || 'No especificada'}</strong>
       (Facultad de ${d.nombre_facultad || 'No especificada'}),
-      completó satisfactoriamente su servicio social en la actividad denominada
+      complet&oacute; satisfactoriamente su servicio social en la actividad denominada
       <strong>"${d.oferta_titulo}"</strong>, acumulando un total de
       <strong>${d.horas_acreditar} horas</strong> acreditadas.
     </p>
@@ -101,28 +109,31 @@ function generarPDF(d) {
     <table class="info-table">
       <tr><td>Nombre completo</td>      <td>${d.nombre_completo}</td></tr>
       <tr><td>Correo institucional</td> <td>${d.correo_institucional}</td></tr>
-      <tr><td>Carrera</td>              <td>${d.nombre_carrera || '—'}</td></tr>
-      <tr><td>Facultad</td>             <td>${d.nombre_facultad || '—'}</td></tr>
+      <tr><td>Carrera</td>              <td>${d.nombre_carrera || '&mdash;'}</td></tr>
+      <tr><td>Facultad</td>             <td>${d.nombre_facultad || '&mdash;'}</td></tr>
       <tr><td>Actividad</td>            <td>${d.oferta_titulo}</td></tr>
-      <tr><td>Descripción</td>          <td>${d.oferta_descripcion || '—'}</td></tr>
-      <tr><td>Ubicación</td>            <td>${d.ubicacion || '—'}</td></tr>
-      <tr><td>Horario</td>              <td>${d.horario || '—'}</td></tr>
-      <tr><td>Fecha de inscripción</td> <td>${fecha}</td></tr>
-      <tr><td>Horas acreditadas</td>    <td><strong>${d.horas_acreditar} horas ✓</strong></td></tr>
-      <tr><td>Estado</td>               <td><strong>FINALIZADO ✓</strong></td></tr>
+      <tr><td>Descripci&oacute;n</td>          <td>${d.oferta_descripcion || '&mdash;'}</td></tr>
+      <tr><td>Ubicaci&oacute;n</td>            <td>${d.ubicacion || '&mdash;'}</td></tr>
+      <tr><td>Fecha de inicio</td>      <td>${fechaInicio}</td></tr>
+      <tr><td>Fecha de finalizaci&oacute;n</td><td>${fechaFin}</td></tr>
+      <tr><td>Hora de inicio</td>       <td>${horaInicio}</td></tr>
+      <tr><td>Hora de finalizaci&oacute;n</td> <td>${horaFin}</td></tr>
+      <tr><td>Fecha de inscripci&oacute;n</td> <td>${fecha}</td></tr>
+      <tr><td>Horas acreditadas</td>    <td><strong>${d.horas_acreditar} horas &#10003;</strong></td></tr>
+      <tr><td>Estado</td>               <td><strong>FINALIZADO &#10003;</strong></td></tr>
     </table>
 
     <div class="footer-line">
-      <div class="footer-date">Sonsonate, El Salvador — ${hoy}</div>
+      <div class="footer-date">Sonsonate, El Salvador &mdash; ${hoy}</div>
       <div class="signature-block">
         <div class="signature-line"></div>
-        <div class="sig-name">Coordinación de Servicio Social</div>
+        <div class="sig-name">Coordinaci&oacute;n de Servicio Social</div>
         <div>Universidad de Sonsonate</div>
       </div>
     </div>
   </div>
 
-  <div class="foot-code">Código de verificación: ${codigo} | Emitido el ${hoy}</div>
+  <div class="foot-code">C&oacute;digo de verificaci&oacute;n: ${codigo} | Emitido el ${hoy}</div>
   <div class="bot-green"></div>
   <div class="bot-blue"></div>
 </div>
@@ -134,7 +145,7 @@ function generarPDF(d) {
   v.document.close();
 }
 
-/* ── Componente principal ────────────────────────────────────────────────── */
+/* Componente principal */
 export default function MisInscripciones() {
   const [data,         setData]         = useState([]);
   const [loading,      setLoading]      = useState(true);
@@ -164,13 +175,14 @@ export default function MisInscripciones() {
 
   const horasAcred   = data.filter(i => i.estado === 'finalizado').reduce((a, i) => a + (i.horas_acreditar || 0), 0);
   const horasActivas = data.filter(i => i.estado === 'aceptado').reduce((a, i)   => a + (i.horas_acreditar || 0), 0);
+  const totalInscripciones = data.filter(i => i.estado !== 'rechazado').length;
 
   return (
     <>
       <PageHeader title="Mis inscripciones" subtitle="Seguimiento de tus actividades de servicio social" />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 16, marginBottom: 28 }}>
-        <StatCard label="Total"             value={data.length}  sub="inscripciones" color="purple" />
+        <StatCard label="Total"             value={totalInscripciones}  sub="inscripciones" color="purple" />
         <StatCard label="Horas acreditadas" value={horasAcred}   sub="finalizadas"   color="green"  />
         <StatCard label="Horas en curso"    value={horasActivas} sub="activas"        color="blue"   />
       </div>
@@ -209,10 +221,16 @@ export default function MisInscripciones() {
                           border: 'none', borderRadius: 6,
                           padding: '6px 12px', fontSize: 12,
                           fontWeight: 600, cursor: loadingRep === i.id_inscripcion ? 'not-allowed' : 'pointer',
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                           transition: '.2s', whiteSpace: 'nowrap',
                         }}
                       >
-                        {loadingRep === i.id_inscripcion ? 'Generando…' : '📄 Constancia'}
+                        {loadingRep === i.id_inscripcion ? 'Generando...' : (
+                          <>
+                            <span aria-hidden="true">{'\uD83D\uDCC4'}</span>
+                            <span>Constancia</span>
+                          </>
+                        )}
                       </button>
                     ) : (
                       <span style={{ fontSize: 12, color: 'var(--text3)' }}>—</span>

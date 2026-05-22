@@ -33,7 +33,6 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
     <tr>
       <td>${a.titulo}</td>
       <td>${a.ubicacion || '—'}</td>
-      <td>${a.horario   || '—'}</td>
       <td style="text-align:center;font-weight:700;color:#1a3a6b">${a.horas_acreditar}h</td>
       <td>${new Date(a.fecha_inscripcion).toLocaleDateString('es-SV')}</td>
     </tr>`).join('');
@@ -133,7 +132,7 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
     <p class="section-title">Detalle de Actividades Realizadas</p>
     <table class="act-table">
       <thead>
-        <tr><th>Actividad</th><th>Ubicación</th><th>Horario</th><th>Horas</th><th>Fecha</th></tr>
+        <tr><th>Actividad</th><th>Ubicación</th><th>Horas</th><th>Fecha</th></tr>
       </thead>
       <tbody>${filas}</tbody>
     </table>
@@ -177,7 +176,8 @@ export default function Perfil() {
   if (loading) return <Spinner />;
   if (!perfil)  return null;
 
-  const horasAcred = insc.filter(i => i.estado === 'finalizado').reduce((a, i) => a + (i.horas_acreditar || 0), 0);
+  const horasPorOfertas = insc.filter(i => i.estado === 'finalizado').reduce((a, i) => a + (i.horas_acreditar || 0), 0);
+  const horasAcred = Number(perfil.horas_acumuladas ?? (horasPorOfertas + Number(perfil.horas_manuales ?? 0)));
   const elegible   = perfil.materias_aprobadas >= 30;
   const META       = 500;
   const completado = horasAcred >= META;
@@ -258,7 +258,7 @@ export default function Perfil() {
                 letterSpacing: .5, transition: '.2s',
               }}
             >
-              {loadingRep ? 'Generando constancia…' : '📄 Descargar Constancia Global de Servicio Social'}
+              {loadingRep ? 'Generando constancia…' : '📄 Descargar Constancia De Finalizacion'}
             </button>
           </div>
         )}

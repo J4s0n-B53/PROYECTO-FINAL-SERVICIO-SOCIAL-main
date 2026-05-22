@@ -1,5 +1,6 @@
 const pool = require('../database/connection');
 const MIN_MATERIAS_APROBADAS = 30;
+const META_HORAS = 500;
 
 async function getAll(user) {
   let sql, params = [];
@@ -44,12 +45,26 @@ async function inscribir(estudianteId, ofertaId) {
     await conn.beginTransaction();
 
     const [[estudiante]] = await conn.query(
-      'SELECT materias_aprobadas FROM usuarios WHERE id_usuario = ? FOR UPDATE',
+      `SELECT u.materias_aprobadas,
+              COALESCE(h.horas_acumuladas, 0) + COALESCE(u.horas_manuales, 0) AS horas_acumuladas
+       FROM usuarios u
+       LEFT JOIN (
+         SELECT i.id_estudiante,
+                SUM(COALESCE(i.horas_acreditadas, o.horas_acreditar)) AS horas_acumuladas
+         FROM inscripciones i
+         JOIN ofertas o ON i.id_oferta = o.id_oferta
+         WHERE i.estado = 'finalizado'
+         GROUP BY i.id_estudiante
+       ) h ON h.id_estudiante = u.id_usuario
+       WHERE u.id_usuario = ?
+       FOR UPDATE`,
       [estudianteId]
     );
     if (!estudiante) throw { status: 404, message: 'Estudiante no encontrado' };
     if ((estudiante.materias_aprobadas || 0) < MIN_MATERIAS_APROBADAS)
       throw { status: 403, message: 'Te falta aprobar al menos el 50% de materias para inscribirte' };
+    if ((estudiante.horas_acumuladas || 0) >= META_HORAS)
+      throw { status: 403, message: 'Ya completaste las 500 horas de servicio social' };
 
     const [[oferta]] = await conn.query(
       'SELECT * FROM ofertas WHERE id_oferta = ? AND activo = TRUE FOR UPDATE',

@@ -10,7 +10,7 @@ async function getReporte(inscripcionId, estudianteId) {
        u.nombre_completo, u.correo_institucional, u.materias_aprobadas,
        c.nombre_carrera, f.nombre_facultad,
        o.titulo AS oferta_titulo, o.descripcion AS oferta_descripcion,
-       o.ubicacion, o.horario,
+       o.ubicacion, o.fecha_inicio, o.fecha_fin, o.hora_inicio, o.hora_fin,
        COALESCE(i.horas_acreditadas, o.horas_acreditar) AS horas_acreditar
      FROM inscripciones i
      JOIN usuarios u ON i.id_estudiante = u.id_usuario
@@ -41,7 +41,7 @@ async function getReporteGlobal(estudianteId) {
     throw { status: 404, message: 'Estudiante no encontrado' };
 
   const [actividades] = await pool.query(
-    `SELECT o.titulo, o.ubicacion, o.horario,
+    `SELECT o.titulo, o.ubicacion, o.fecha_inicio, o.fecha_fin, o.hora_inicio, o.hora_fin,
             COALESCE(i.horas_acreditadas, o.horas_acreditar) AS horas_acreditar,
             COALESCE(i.fecha_acreditacion, i.fecha_inscripcion) AS fecha_inscripcion
      FROM inscripciones i
@@ -55,7 +55,10 @@ async function getReporteGlobal(estudianteId) {
     actividades.push({
       titulo: 'Horas manuales acreditadas',
       ubicacion: 'Actividad externa',
-      horario: 'No aplica',
+      fecha_inicio: null,
+      fecha_fin: null,
+      hora_inicio: null,
+      hora_fin: null,
       horas_acreditar: estudiante.horas_manuales,
       fecha_inscripcion: estudiante.fecha_horas_manuales || estudiante.created_at
     });

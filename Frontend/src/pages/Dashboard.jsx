@@ -11,7 +11,6 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
     <tr>
       <td>${a.titulo}</td>
       <td>${a.ubicacion || '—'}</td>
-      <td>${a.horario   || '—'}</td>
       <td style="text-align:center;font-weight:700;color:#1a3a6b">${a.horas_acreditar}h</td>
       <td>${new Date(a.fecha_inscripcion).toLocaleDateString('es-SV')}</td>
     </tr>`).join('');
@@ -111,7 +110,7 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
     <p class="section-title">Detalle de Actividades Realizadas</p>
     <table class="act-table">
       <thead>
-        <tr><th>Actividad</th><th>Ubicación</th><th>Horario</th><th>Horas</th><th>Fecha</th></tr>
+        <tr><th>Actividad</th><th>Ubicación</th><th>Horas</th><th>Fecha</th></tr>
       </thead>
       <tbody>${filas}</tbody>
     </table>
