@@ -8,9 +8,9 @@ const ADMIN_MENU = [
   { to: '/usuarios',      label: 'Usuarios', },
 ];
 const STUDENT_MENU = [
-  { to: '/ofertas',           label: 'Ofertas disponibles', icon: '▣' },
-  { to: '/mis-inscripciones', label: 'Mis inscripciones',   icon: '▤' },
-  { to: '/perfil',            label: 'Mi perfil',           icon: '●' },
+  { to: '/ofertas',           label: 'Ofertas disponibles', icon: '💼' },
+  { to: '/mis-inscripciones', label: 'Mis inscripciones',   icon: '📋' },
+  { to: '/perfil',            label: 'Mi perfil',           icon: '👤' },
 ];
 
 function initials(name = '') {

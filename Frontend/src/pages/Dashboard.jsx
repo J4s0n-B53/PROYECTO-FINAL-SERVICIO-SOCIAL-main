@@ -6,6 +6,7 @@ import { PageHeader, StatCard, TableWrap, Th, Td, Badge, Spinner, useToast, Toas
 function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
   const hoy    = new Date().toLocaleDateString('es-SV', { year: 'numeric', month: 'long', day: 'numeric' });
   const codigo = `USO-SS-GLOBAL-${e.id_usuario.toString().padStart(5, '0')}`;
+  const logoUrl = `${window.location.origin}/logo-uso.png`;
 
   const filas = actividades.map(a => `
     <tr>
@@ -28,7 +29,8 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
   .top-blue{background:#1a3a6b;padding:6px 0;display:flex;justify-content:center}
   .top-blue span{color:#fff;font-size:11px;letter-spacing:1px;opacity:.75}
   .header-main{padding:28px 40px 20px;display:flex;align-items:center;gap:20px;border-bottom:3px solid #2c6e2f}
-  .logo-box{background:#1a3a6b;color:#fff;font-family:'Source Sans 3',sans-serif;font-weight:600;font-size:20px;letter-spacing:2px;width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:6px;flex-shrink:0}
+  .logo-box{width:70px;height:70px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .logo-box img{width:70px;height:70px;object-fit:contain;display:block}
   .univ-name{font-family:'Playfair Display',serif;color:#1a3a6b;font-size:22px;font-weight:600;line-height:1.2;margin:0}
   .univ-sub{color:#2c6e2f;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:4px}
   .body{padding:32px 40px 28px}
@@ -77,7 +79,7 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
   <div class="top-blue"><span>DOCUMENTO OFICIAL</span></div>
 
   <div class="header-main">
-    <div class="logo-box">USO</div>
+    <div class="logo-box"><img src="${logoUrl}" alt="Logo USO"/></div>
     <div>
       <p class="univ-name">Universidad de Sonsonate</p>
       <p class="univ-sub">Sistema de Servicio Social</p>

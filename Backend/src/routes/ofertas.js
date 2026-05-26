@@ -2,6 +2,9 @@ const router = require('express').Router();
 const ofertasController = require('../controllers/ofertasController');
 const { authMiddleware, adminOnly } = require('../middlewares/auth');
 
+// POST /api/ofertas/upload-imagen
+router.post('/upload-imagen', authMiddleware, adminOnly, ofertasController.uploadImagen);
+
 // GET /api/ofertas
 router.get('/',          authMiddleware,            ofertasController.getAll);
 

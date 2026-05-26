@@ -13,6 +13,12 @@ const EMPTY_FORM = {
 };
 const MIN_MATERIAS_APROBADAS = 30;
 const META_HORAS = 500;
+const API_BASE_URL = 'http://localhost:4000';
+
+function imageSrc(value) {
+  if (!value) return '';
+  return String(value).startsWith('/uploads') ? `${API_BASE_URL}${value}` : value;
+}
 
 function formatDate(value) {
   if (!value) return '';
@@ -57,6 +63,112 @@ function TimeSelect({ value, onChange }) {
   );
 }
 
+function ImageDropField({ value, file, onFile, onUrlChange }) {
+  const [dragging, setDragging] = useState(false);
+  const [preview, setPreview] = useState('');
+
+  useEffect(() => {
+    if (!file) {
+      setPreview(imageSrc(value));
+      return undefined;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setPreview(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file, value]);
+
+  function pickFile(selectedFile) {
+    if (!selectedFile || !selectedFile.type.startsWith('image/')) return;
+    onFile(selectedFile);
+  }
+
+  return (
+    <div>
+      <label
+        onDragOver={e => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={e => {
+          e.preventDefault();
+          setDragging(false);
+          pickFile(e.dataTransfer.files?.[0]);
+        }}
+        style={{
+          display:'flex',
+          alignItems:'center',
+          justifyContent:'center',
+          flexDirection:'column',
+          gap:8,
+          minHeight:140,
+          border:'1px dashed rgba(10,27,78,.30)',
+          borderRadius:10,
+          background: dragging ? 'rgba(15,158,110,.08)' : '#f8f9fc',
+          color:'var(--text2)',
+          cursor:'pointer',
+          overflow:'hidden',
+          transition:'background .15s, border-color .15s'
+        }}
+      >
+        <input
+          type="file"
+          accept="image/*"
+          onChange={e => pickFile(e.target.files?.[0])}
+          style={{ display:'none' }}
+        />
+        {preview ? (
+          <img
+            src={preview}
+            alt="Vista previa"
+            style={{ width:'100%', height:170, objectFit:'cover', display:'block' }}
+          />
+        ) : (
+          <>
+            <div style={{ fontSize:26, lineHeight:1 }}>▧</div>
+            <div style={{ fontSize:13, fontWeight:600, color:'var(--text)' }}>
+              Selecciona o arrastra una imagen
+            </div>
+            <div style={{ fontSize:12, color:'var(--text3)' }}>PNG, JPG o WEBP. Máximo 5 MB.</div>
+          </>
+        )}
+      </label>
+
+      {file && (
+        <div style={{ marginTop:8, fontSize:12, color:'var(--text3)' }}>
+          Imagen seleccionada: {file.name}
+        </div>
+      )}
+
+      {preview && (
+        <button
+          type="button"
+          onClick={() => { onFile(null); onUrlChange(''); }}
+          style={{
+            marginTop:8,
+            border:'1px solid rgba(217,48,37,.30)',
+            background:'rgba(217,48,37,.08)',
+            color:'#b52920',
+            borderRadius:6,
+            padding:'6px 10px',
+            fontFamily:'inherit',
+            fontSize:12,
+            cursor:'pointer'
+          }}
+        >
+          Quitar imagen
+        </button>
+      )}
+
+      <div style={{ marginTop:10 }}>
+        <Input
+          value={value}
+          onChange={e => { onFile(null); onUrlChange(e.target.value); }}
+          placeholder="O pega una URL de imagen..."
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function Ofertas() {
   const { user } = useAuth();
   const isAdmin  = user?.rol === 'admin';
@@ -73,6 +185,7 @@ export default function Ofertas() {
   const [adminDetModal, setAdminDetModal] = useState(null);
   const [confirmDesuscripcion, setConfirmDesuscripcion] = useState(null);
   const [form,      setForm]      = useState(EMPTY_FORM);
+  const [imageFile, setImageFile] = useState(null);
   const [editId,    setEditId]    = useState(null);
   const [saving,    setSaving]    = useState(false);
   const { toast, show } = useToast();
@@ -96,7 +209,7 @@ export default function Ofertas() {
 
   useEffect(() => { load(); }, []);
 
-  function openNew()   { setForm(EMPTY_FORM); setEditId(null); setModal(true); }
+  function openNew()   { setForm(EMPTY_FORM); setImageFile(null); setEditId(null); setModal(true); }
   function openEdit(o) {
     setForm({
       titulo: o.titulo, descripcion: o.descripcion, ubicacion: o.ubicacion||'',
@@ -108,6 +221,7 @@ export default function Ofertas() {
       cupo_maximo: o.cupo_maximo, id_carrera: o.id_carrera||'',
       imagen_url: o.imagen_url||'', activo: o.activo
     });
+    setImageFile(null);
     setEditId(o.id_oferta);
     setModal(true);
   }
@@ -149,7 +263,17 @@ export default function Ofertas() {
     }
     setSaving(true);
     try {
-      const body = { ...form, fecha_inicio: fechaInicio, fecha_fin: fechaFin, hora_inicio: horaInicio || '', hora_fin: horaFin || '', id_carrera: form.id_carrera || null };
+      let imagenUrl = form.imagen_url;
+      if (imageFile) {
+        const data = new FormData();
+        data.append('imagen', imageFile);
+        const uploaded = await api.post('/ofertas/upload-imagen', data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        imagenUrl = uploaded.data.imagen_url;
+      }
+
+      const body = { ...form, imagen_url: imagenUrl, fecha_inicio: fechaInicio, fecha_fin: fechaFin, hora_inicio: horaInicio || '', hora_fin: horaFin || '', id_carrera: form.id_carrera || null };
       if (editId) await api.put(`/ofertas/${editId}`, body);
       else        await api.post('/ofertas', body);
       show(editId ? 'Oferta actualizada' : 'Oferta creada');
@@ -378,7 +502,14 @@ export default function Ofertas() {
             {carreras.map(c => <option key={c.id_carrera} value={c.id_carrera}>{c.nombre_carrera}</option>)}
           </Select>
         </Field>
-        <Field label="URL de imagen (opcional)"><Input value={form.imagen_url} onChange={e=>setForm({...form,imagen_url:e.target.value})} placeholder="https://..." /></Field>
+        <Field label="Imagen de la oferta (opcional)">
+          <ImageDropField
+            value={form.imagen_url}
+            file={imageFile}
+            onFile={file => setImageFile(file)}
+            onUrlChange={url => setForm({...form, imagen_url:url})}
+          />
+        </Field>
       </Modal>
 
       {adminDetModal && (
@@ -454,7 +585,7 @@ function AdminOfertaCard({ o, onOpen, onEdit, onToggle }) {
       onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(10,27,78,.10)';e.currentTarget.style.boxShadow='0 1px 4px rgba(10,27,78,.06)';e.currentTarget.style.transform='translateY(0)'}}
     >
       {o.imagen_url
-        ? <img src={o.imagen_url} alt={o.titulo} style={{ width:'100%', height:150, objectFit:'cover' }} onError={e=>e.currentTarget.style.display='none'} />
+        ? <img src={imageSrc(o.imagen_url)} alt={o.titulo} style={{ width:'100%', height:150, objectFit:'cover' }} onError={e=>e.currentTarget.style.display='none'} />
         : <div style={{ width:'100%', height:150, background:'linear-gradient(135deg,#e8eaf2 0%,#d0d5ea 100%)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:32 }}>SS</div>
       }
 
@@ -751,7 +882,7 @@ function OfertaCard({ o, user, inscripcion, onVer, onDesuscribir }) {
       onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(10,27,78,.10)';e.currentTarget.style.boxShadow='0 1px 4px rgba(10,27,78,.06)';e.currentTarget.style.transform='translateY(0)'}}
     >
       {o.imagen_url
-        ? <img src={o.imagen_url} alt={o.titulo} style={{ width:'100%', height:140, objectFit:'cover' }} onError={e=>e.target.style.display='none'} />
+        ? <img src={imageSrc(o.imagen_url)} alt={o.titulo} style={{ width:'100%', height:140, objectFit:'cover' }} onError={e=>e.target.style.display='none'} />
         : <div style={{ width:'100%', height:140, background:'linear-gradient(135deg,#e8eaf2 0%,#d0d5ea 100%)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:32 }}>SS</div>
       }
       <div style={{ padding:16, display:'flex', flexDirection:'column', flex:1 }}>
@@ -832,7 +963,7 @@ function DetalleModal({ o, user, onClose, onInscribir }) {
         {isFull  && <Btn variant="outline" disabled>Cupo máximo alcanzado</Btn>}
       </>}
     >
-      {o.imagen_url && <img src={o.imagen_url} alt={o.titulo} style={{ width:'100%', height:180, objectFit:'cover', borderRadius:8, marginBottom:16 }} onError={e=>e.target.style.display='none'} />}
+      {o.imagen_url && <img src={imageSrc(o.imagen_url)} alt={o.titulo} style={{ width:'100%', height:180, objectFit:'cover', borderRadius:8, marginBottom:16 }} onError={e=>e.target.style.display='none'} />}
       <p style={{ fontSize:13, color:'var(--text2)', lineHeight:1.7, marginBottom:16 }}>{o.descripcion}</p>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:16 }}>
         {[
