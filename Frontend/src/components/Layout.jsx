@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+﻿import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const ADMIN_MENU = [
@@ -8,9 +8,9 @@ const ADMIN_MENU = [
   { to: '/usuarios',      label: 'Usuarios', },
 ];
 const STUDENT_MENU = [
-  { to: '/ofertas',           label: 'Ofertas disponibles', icon: '🗂' },
-  { to: '/mis-inscripciones', label: 'Mis inscripciones',   icon: '📋' },
-  { to: '/perfil',            label: 'Mi perfil',           icon: '👤' },
+  { to: '/ofertas',           label: 'Ofertas disponibles', icon: '▣' },
+  { to: '/mis-inscripciones', label: 'Mis inscripciones',   icon: '▤' },
+  { to: '/perfil',            label: 'Mi perfil',           icon: '●' },
 ];
 
 function initials(name = '') {
@@ -35,12 +35,24 @@ export default function Layout() {
         position: 'sticky', top: 0, zIndex: 100
       }}>
         {/* Logo */}
-        <span style={{
-          fontWeight: 800, fontSize: 17, color: '#fff',
-          letterSpacing: -.5, fontFamily: 'inherit'
-        }}>
-          SSE<span style={{ color: '#6fe0b8' }}>.</span>USO
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <img
+            src="/logo-uso.png"
+            alt="Logo USO"
+            style={{
+              width: 30,
+              height: 30,
+              objectFit: 'contain',
+              display: 'block'
+            }}
+          />
+          <span style={{
+            fontWeight: 800, fontSize: 17, color: '#fff',
+            letterSpacing: -.5, fontFamily: 'inherit'
+          }}>
+            SSE<span style={{ color: '#6fe0b8' }}>.</span>USO
+          </span>
+        </div>
 
         <div style={{ flex: 1 }} />
 
@@ -125,3 +137,4 @@ export default function Layout() {
     </div>
   );
 }
+

@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import api from '../services/apiClient';
-import { PageHeader, StatCard, TableWrap, Th, Td, Badge, Btn, Spinner, useToast, Toast } from '../components/UI';
+import { PageHeader, StatCard, TableWrap, Th, Td, Badge, Spinner, useToast, Toast } from '../components/UI';
 
-/* ── Generador PDF global — diseño constancia institucional ─────────────── */
+/* Generador PDF global: constancia institucional */
 function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
   const hoy    = new Date().toLocaleDateString('es-SV', { year: 'numeric', month: 'long', day: 'numeric' });
   const codigo = `USO-SS-GLOBAL-${e.id_usuario.toString().padStart(5, '0')}`;
@@ -10,7 +10,7 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
   const filas = actividades.map(a => `
     <tr>
       <td>${a.titulo}</td>
-      <td>${a.ubicacion || '—'}</td>
+      <td>${a.ubicacion || '&mdash;'}</td>
       <td style="text-align:center;font-weight:700;color:#1a3a6b">${a.horas_acreditar}h</td>
       <td>${new Date(a.fecha_inscripcion).toLocaleDateString('es-SV')}</td>
     </tr>`).join('');
@@ -86,46 +86,46 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
 
   <div class="body">
     <p class="doc-title">CONSTANCIA GLOBAL DE SERVICIO SOCIAL</p>
-    <p class="doc-sub">Documento oficial de culminación — ${totalHoras} horas acreditadas</p>
+    <p class="doc-sub">Documento oficial de culminaci&oacute;n &mdash; ${totalHoras} horas acreditadas</p>
 
-    <div class="badge"><span>✓ Servicio Social Completado</span></div>
+    <div class="badge"><span>&#10003; Servicio Social Completado</span></div>
 
     <p class="body-text">
-      La <strong>Universidad de Sonsonate</strong>, a través de la Coordinación de Servicio Social,
+      La <strong>Universidad de Sonsonate</strong>, a trav&eacute;s de la Coordinaci&oacute;n de Servicio Social,
       hace constar que el/la estudiante <strong>${e.nombre_completo}</strong> ha cumplido
       satisfactoriamente con el total de horas de servicio social requeridas, completando
       <strong>${totalHoras} horas</strong> distribuidas en ${actividades.length} actividad(es),
-      superando el requisito mínimo de <strong>${meta} horas</strong>.
+      superando el requisito m&iacute;nimo de <strong>${meta} horas</strong>.
     </p>
 
     <table class="info-table">
       <tr><td>Nombre completo</td>      <td>${e.nombre_completo}</td></tr>
       <tr><td>Correo institucional</td> <td>${e.correo_institucional}</td></tr>
-      <tr><td>Carrera</td>              <td>${e.nombre_carrera || '—'}</td></tr>
-      <tr><td>Facultad</td>             <td>${e.nombre_facultad || '—'}</td></tr>
-      <tr><td>Total de horas</td>       <td><strong>${totalHoras} horas ✓</strong></td></tr>
+      <tr><td>Carrera</td>              <td>${e.nombre_carrera || '&mdash;'}</td></tr>
+      <tr><td>Facultad</td>             <td>${e.nombre_facultad || '&mdash;'}</td></tr>
+      <tr><td>Total de horas</td>       <td><strong>${totalHoras} horas &#10003;</strong></td></tr>
       <tr><td>Actividades</td>          <td>${actividades.length} completadas</td></tr>
     </table>
 
     <p class="section-title">Detalle de Actividades Realizadas</p>
     <table class="act-table">
       <thead>
-        <tr><th>Actividad</th><th>Ubicación</th><th>Horas</th><th>Fecha</th></tr>
+        <tr><th>Actividad</th><th>Ubicaci&oacute;n</th><th>Horas</th><th>Fecha</th></tr>
       </thead>
       <tbody>${filas}</tbody>
     </table>
 
     <div class="footer-line">
-      <div class="footer-date">Sonsonate, El Salvador — ${hoy}</div>
+      <div class="footer-date">Sonsonate, El Salvador &mdash; ${hoy}</div>
       <div class="signature-block">
         <div class="signature-line"></div>
-        <div class="sig-name">Coordinación de Servicio Social</div>
+        <div class="sig-name">Coordinaci&oacute;n de Servicio Social</div>
         <div>Universidad de Sonsonate</div>
       </div>
     </div>
   </div>
 
-  <div class="foot-code">Código: ${codigo} | Emitido el ${hoy}</div>
+  <div class="foot-code">C&oacute;digo: ${codigo} | Emitido el ${hoy}</div>
   <div class="bot-green"></div>
   <div class="bot-blue"></div>
 </div></body></html>`;
@@ -135,7 +135,7 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
   v.document.close();
 }
 
-/* ── Componente principal ───────────────────────────────────────────────── */
+/* Componente principal */
 export default function Dashboard() {
   const [inscripciones, setInscripciones] = useState([]);
   const [ofertas,       setOfertas]       = useState([]);
@@ -163,14 +163,6 @@ export default function Dashboard() {
     finally { setLoading(false); }
   }
   useEffect(() => { load(); }, []);
-
-  async function cambiarEstado(id, estado) {
-    try {
-      await api.patch(`/inscripciones/${id}/estado`, { estado });
-      show(`Estado actualizado a "${estado}"`);
-      load();
-    } catch { show('Error al actualizar', 'error'); }
-  }
 
   async function handleReporteGlobal(estudianteId) {
     setLoadingRep(estudianteId);
@@ -223,11 +215,11 @@ export default function Dashboard() {
       <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 14 }}>Inscripciones recientes</div>
       <TableWrap>
         <thead><tr>
-          <Th>Estudiante</Th><Th>Oferta</Th><Th>Fecha</Th><Th>Estado</Th><Th>Acción</Th>
+          <Th>Estudiante</Th><Th>Oferta</Th><Th>Fecha</Th><Th>Estado</Th>
         </tr></thead>
         <tbody>
           {recientes.length === 0 && (
-            <tr><Td colSpan={5} style={{ textAlign: 'center', padding: 40, color: 'var(--text3)' }}>Sin inscripciones aún</Td></tr>
+            <tr><Td colSpan={4} style={{ textAlign: 'center', padding: 40, color: 'var(--text3)' }}>Sin inscripciones aún</Td></tr>
           )}
           {recientes.map(i => (
             <tr key={i.id_inscripcion}>
@@ -235,27 +227,24 @@ export default function Dashboard() {
               <Td>{i.oferta_titulo}</Td>
               <Td style={{ fontSize: 12 }}>{new Date(i.fecha_inscripcion).toLocaleDateString('es-SV')}</Td>
               <Td><Badge type={i.estado}>{i.estado}</Badge></Td>
-              <Td>
-                {i.estado === 'pendiente'  && <Btn variant="green"   onClick={() => cambiarEstado(i.id_inscripcion, 'aceptado')}>Aceptar</Btn>}
-                {i.estado === 'aceptado'   && <Btn variant="outline" onClick={() => cambiarEstado(i.id_inscripcion, 'finalizado')}>Finalizar</Btn>}
-                {i.estado === 'finalizado' && <span style={{ fontSize: 12, color: 'var(--text3)' }}>Completado</span>}
-              </Td>
             </tr>
           ))}
         </tbody>
       </TableWrap>
 
-      {/* ── Sección: Finalización de Servicio Social ── */}
+      {/* Seccion: Finalizacion de Servicio Social */}
       <div style={{ marginTop: 40 }}>
 
-        {/* Encabezado de sección */}
+        {/* Encabezado de seccion */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10,
             background: 'linear-gradient(135deg,#0fce8a,#0be0b8)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 18,
-          }}>🎓</div>
+          }}>
+            <span style={{ fontSize: 16, fontWeight: 700 }}>✓</span>
+          </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>Finalización de Servicio Social</div>
             <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 2 }}>
@@ -289,7 +278,12 @@ export default function Dashboard() {
                 transform:'translateY(-50%)',
                 fontSize:14,
                 color:'var(--text3)'
-              }}>⌕</span>
+              }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" d="m21 21-4.3-4.3" />
+                  <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="2" />
+                </svg>
+              </span>
               <input
                 value={queryCompletos}
                 onChange={e => setQueryCompletos(e.target.value)}
@@ -332,13 +326,13 @@ export default function Dashboard() {
         )}
 
         {estudiantesCompletos.length === 0 ? (
-          /* Estado vacío */
+          /* Estado vacio */
           <div style={{
             background: 'var(--bg2)', border: '1px dashed var(--border)',
             borderRadius: 12, padding: '36px 24px', textAlign: 'center',
             color: 'var(--text3)', fontSize: 13,
           }}>
-            <div style={{ fontSize: 32, marginBottom: 10 }}>📋</div>
+            <div style={{ fontSize: 24, marginBottom: 10 }}>✓</div>
             Aún ningún estudiante ha completado las 500 horas de servicio social.
           </div>
         ) : estudiantesCompletosFiltrados.length === 0 ? (
@@ -391,7 +385,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Botón */}
+                {/* Boton */}
                 <button
                   onClick={() => handleReporteGlobal(est.id)}
                   disabled={loadingRep === est.id}
@@ -407,7 +401,12 @@ export default function Dashboard() {
                     letterSpacing: .3, transition: '.2s',
                   }}
                 >
-                  {loadingRep === est.id ? 'Generando…' : '📄 Descargar Constancia de Finalización'}
+                  {loadingRep === est.id ? 'Generando...' : (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                      <span aria-hidden="true">{'\uD83D\uDCC4'}</span>
+                      <span>Descargar Constancia de Finalización</span>
+                    </span>
+                  )}
                 </button>
               </div>
             ))}
@@ -419,3 +418,4 @@ export default function Dashboard() {
     </>
   );
 }
+

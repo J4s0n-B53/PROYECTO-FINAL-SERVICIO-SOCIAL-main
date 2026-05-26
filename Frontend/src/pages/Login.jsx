@@ -1,123 +1,4 @@
-/*import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-
-const DEMOS = [
-  { label: '👨‍💼 Administrador',    correo: 'admin@usonsonate.edu.sv',          pass: '2323' },
-  { label: '🎓 Brayan (Sistemas)', correo: 'sd23i04002@usonsonate.edu.sv',     pass: '5678' },
-  { label: '🎓 Jorge (Jurídicas)', correo: 'ce25d01005@usonsonate.edu.sv',     pass: '5678' },
-  { label: '🎓 Sofía (Jurídicas)', correo: 'tg22d01001@usonsonate.edu.sv',     pass: '5678' },
-];
-
-export default function Login() {
-  const { login } = useAuth();
-  const navigate  = useNavigate();
-  const [correo,   setCorreo]   = useState('');
-  const [password, setPassword] = useState('');
-  const [error,    setError]    = useState('');
-  const [loading,  setLoading]  = useState(false);
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError(''); setLoading(true);
-    try {
-      const user = await login(correo, password);
-      navigate(user.rol === 'admin' ? '/dashboard' : '/ofertas', { replace: true });
-    } catch {
-      setError('Correo o contraseña incorrectos.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function fillDemo(d) { setCorreo(d.correo); setPassword(d.pass); setError(''); }
-
-  const inp = {
-    width: '100%', background: '#f0f2f7', border: '1px solid rgba(10,27,78,.18)',
-    borderRadius: 8, padding: '12px 14px', fontFamily: 'inherit',
-    fontSize: 14, color: '#0d1b3e', outline: 'none'
-  };
-
-  return (
-    <div style={{
-      display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh',
-      background: `radial-gradient(ellipse 70% 60% at 60% 40%, rgba(10,27,78,.06) 0%, transparent 70%),
-                   radial-gradient(ellipse 50% 40% at 20% 80%, rgba(10,27,78,.04) 0%, transparent 60%),
-                   #f0f2f7`
-    }}>
-      <form onSubmit={handleSubmit} style={{
-        width: 420, background: '#ffffff', border: '1px solid rgba(10,27,78,.12)',
-        borderRadius: 20, padding: '48px 40px 40px',
-        boxShadow: '0 8px 40px rgba(10,27,78,.12)', animation: 'fadeUp .5s ease'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-          <div style={{
-            width: 38, height: 38, borderRadius: 10,
-            background: '#0A1B4E', display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <span style={{ color: '#fff', fontSize: 16, fontWeight: 700 }}>SS</span>
-          </div>
-          <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: 22, color: '#0A1B4E' }}>
-            USO
-          </div>
-        </div>
-        <p style={{ fontSize: 13, color: '#4a5578', marginBottom: 36 }}>
-          Sistema de Servicio Social — Universidad de Sonsonate
-        </p>
-
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ display:'block', fontSize:13, fontWeight:500, color:'#4a5578', marginBottom:8 }}>
-            Correo institucional
-          </label>
-          <input style={inp} type="email" value={correo} onChange={e=>setCorreo(e.target.value)}
-            placeholder="usuario@usonsonate.edu.sv" required autoComplete="off" />
-        </div>
-
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ display:'block', fontSize:13, fontWeight:500, color:'#4a5578', marginBottom:8 }}>
-            Contraseña
-          </label>
-          <input style={inp} type="password" value={password} onChange={e=>setPassword(e.target.value)}
-            placeholder="••••••••" required />
-        </div>
-
-        <button type="submit" disabled={loading} style={{
-          width:'100%', background:'#0A1B4E', color:'#fff', border:'none',
-          borderRadius:8, padding:13, fontFamily:'inherit', fontSize:14,
-          fontWeight:600, cursor: loading ? 'not-allowed' : 'pointer',
-          opacity: loading ? .7 : 1, transition: '.2s', marginTop:8
-        }}>
-          {loading ? 'Verificando…' : 'Iniciar sesión'}
-        </button>
-
-        {error && (
-          <div style={{
-            background:'rgba(217,48,37,.08)', border:'1px solid rgba(217,48,37,.25)',
-            color:'#b52920', borderRadius:8, padding:'10px 14px',
-            fontSize:13, marginTop:14
-          }}>{error}</div>
-        )}
-
-        <div style={{ marginTop:24, paddingTop:24, borderTop:'1px solid rgba(10,27,78,.08)' }}>
-          <p style={{ fontSize:12, color:'#8d97b8', marginBottom:10 }}>Acceso rápido (demo):</p>
-          <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
-            {DEMOS.map(d => (
-              <button key={d.correo} type="button" onClick={() => fillDemo(d)} style={{
-                background:'#f0f2f7', border:'1px solid rgba(10,27,78,.12)',
-                borderRadius:6, padding:'5px 10px', fontSize:11, color:'#4a5578',
-                cursor:'pointer', fontFamily:'inherit', transition:'.2s'
-              }}>{d.label}</button>
-            ))}
-          </div>
-        </div>
-      </form>
-    </div>
-  );
-}*/
-
-
-
-/*import { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -125,11 +6,11 @@ const INSTITUTIONAL_DOMAIN = '@usonsonate.edu.sv';
 
 export default function Login() {
   const { login } = useAuth();
-  const navigate  = useNavigate();
-  const [correo,   setCorreo]   = useState('');
+  const navigate = useNavigate();
+  const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
-  const [error,    setError]    = useState('');
-  const [loading,  setLoading]  = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -140,109 +21,14 @@ export default function Login() {
       return;
     }
 
-    setError(''); setLoading(true);
+    setError('');
+    setLoading(true);
+
     try {
       const user = await login(correoNormalizado, password);
       navigate(user.rol === 'admin' ? '/dashboard' : '/ofertas', { replace: true });
     } catch (err) {
       setError(err.response?.data?.error || 'Correo o contraseña incorrectos.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const inp = {
-    width: '100%', background: '#f0f2f7', border: '1px solid rgba(10,27,78,.18)',
-    borderRadius: 8, padding: '12px 14px', fontFamily: 'inherit',
-    fontSize: 14, color: '#0d1b3e', outline: 'none'
-  };
-
-  return (
-    <div style={{
-      display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh',
-      background: `radial-gradient(ellipse 70% 60% at 60% 40%, rgba(10,27,78,.06) 0%, transparent 70%),
-                   radial-gradient(ellipse 50% 40% at 20% 80%, rgba(10,27,78,.04) 0%, transparent 60%),
-                   #f0f2f7`
-    }}>
-      <form onSubmit={handleSubmit} style={{
-        width: 420, background: '#ffffff', border: '1px solid rgba(10,27,78,.12)',
-        borderRadius: 20, padding: '48px 40px 40px',
-        boxShadow: '0 8px 40px rgba(10,27,78,.12)', animation: 'fadeUp .5s ease'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-          <div style={{
-            width: 38, height: 38, borderRadius: 10,
-            background: '#0A1B4E', display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <span style={{ color: '#fff', fontSize: 16, fontWeight: 700 }}>SS</span>
-          </div>
-          <div style={{ fontFamily: "'DM Serif Display',serif", fontSize: 22, color: '#0A1B4E' }}>
-            USO
-          </div>
-        </div>
-        <p style={{ fontSize: 13, color: '#4a5578', marginBottom: 36 }}>
-          Sistema de Servicio Social — Universidad de Sonsonate
-        </p>
-
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ display:'block', fontSize:13, fontWeight:500, color:'#4a5578', marginBottom:8 }}>
-            Correo institucional
-          </label>
-          <input style={inp} type="email" value={correo} onChange={e=>setCorreo(e.target.value)}
-            placeholder="usuario@usonsonate.edu.sv" required autoComplete="off" />
-        </div>
-
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ display:'block', fontSize:13, fontWeight:500, color:'#4a5578', marginBottom:8 }}>
-            Contraseña
-          </label>
-          <input style={inp} type="password" value={password} onChange={e=>setPassword(e.target.value)}
-            placeholder="••••••••" required />
-        </div>
-
-        <button type="submit" disabled={loading} style={{
-          width:'100%', background:'#0A1B4E', color:'#fff', border:'none',
-          borderRadius:8, padding:13, fontFamily:'inherit', fontSize:14,
-          fontWeight:600, cursor: loading ? 'not-allowed' : 'pointer',
-          opacity: loading ? .7 : 1, transition: '.2s', marginTop:8
-        }}>
-          {loading ? 'Verificando…' : 'Iniciar sesión'}
-        </button>
-
-        {error && (
-          <div style={{
-            background:'rgba(217,48,37,.08)', border:'1px solid rgba(217,48,37,.25)',
-            color:'#b52920', borderRadius:8, padding:'10px 14px',
-            fontSize:13, marginTop:14
-          }}>{error}</div>
-        )}
-      </form>
-    </div>
-  );
-}*/
-
-
-
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-
-export default function Login() {
-  const { login } = useAuth();
-  const navigate  = useNavigate();
-  const [correo,   setCorreo]   = useState('');
-  const [password, setPassword] = useState('');
-  const [error,    setError]    = useState('');
-  const [loading,  setLoading]  = useState(false);
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError(''); setLoading(true);
-    try {
-      const user = await login(correo, password);
-      navigate(user.rol === 'admin' ? '/dashboard' : '/ofertas', { replace: true });
-    } catch {
-      setError('Correo o contraseña incorrectos.');
     } finally {
       setLoading(false);
     }
@@ -282,18 +68,18 @@ export default function Login() {
         }
         .login-form {
           width: 100%;
-          max-width: 340px;
+          max-width: 395px;
           display: flex;
           flex-direction: column;
         }
         .login-logo {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 3px;
           margin-bottom: 6px;
         }
         .login-logo-icon {
-          width: 38px;
+          width: 46px;
           height: 38px;
           border-radius: 10px;
           background: #0A1B4E;
@@ -316,6 +102,7 @@ export default function Login() {
           color: #4a5578;
           margin-bottom: 32px;
           line-height: 1.5;
+          white-space: nowrap;
         }
         .login-field {
           margin-bottom: 18px;
@@ -385,6 +172,16 @@ export default function Login() {
           font-weight: 700;
           margin-bottom: 16px;
         }
+        .login-overlay-content {
+          transform: translateY(-34px);
+        }
+        .login-welcome-logo {
+          width: 118px;
+          height: 118px;
+          object-fit: contain;
+          margin: 0 auto 22px;
+          filter: drop-shadow(0 10px 18px rgba(0,0,0,.18));
+        }
         .login-overlay-content p {
           font-size: 14px;
           line-height: 1.7;
@@ -404,15 +201,14 @@ export default function Login() {
 
       <div className="login-page">
         <div className="login-container">
-
           <div className="login-form-side">
             <form onSubmit={handleSubmit} className="login-form">
               <div className="login-logo">
-                <div className="login-logo-icon">SS</div>
+                <div className="login-logo-icon">SSE.</div>
                 <span className="login-logo-text">USO</span>
               </div>
               <p className="login-subtitle">
-                Sistema de Servicio Social — Universidad de Sonsonate
+                Sistema de Servicio Social Estudiantil — Universidad de Sonsonate
               </p>
 
               <div className="login-field">
@@ -424,7 +220,8 @@ export default function Login() {
                   placeholder="usuario@usonsonate.edu.sv"
                   pattern="^[^@\s]+@usonsonate\.edu\.sv$"
                   title="Usa tu correo institucional @usonsonate.edu.sv"
-                  required autoComplete="off"
+                  required
+                  autoComplete="off"
                 />
               </div>
 
@@ -440,7 +237,7 @@ export default function Login() {
               </div>
 
               <button type="submit" disabled={loading} className="login-btn">
-                {loading ? 'Verificando…' : 'Iniciar sesión'}
+                {loading ? 'Verificando...' : 'Iniciar sesión'}
               </button>
 
               {error && <div className="login-error">{error}</div>}
@@ -449,11 +246,11 @@ export default function Login() {
 
           <div className="login-overlay-side">
             <div className="login-overlay-content">
+              <img className="login-welcome-logo" src="/logo-uso.png" alt="Logo USO" />
               <h1>¡Bienvenido!</h1>
               <p>Ingresa tus datos para acceder al sistema de servicio social</p>
             </div>
           </div>
-
         </div>
       </div>
     </>

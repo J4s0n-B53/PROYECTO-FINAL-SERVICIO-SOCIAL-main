@@ -71,6 +71,7 @@ export default function Ofertas() {
   const [modal,     setModal]     = useState(false);
   const [detModal,  setDetModal]  = useState(null);
   const [adminDetModal, setAdminDetModal] = useState(null);
+  const [confirmDesuscripcion, setConfirmDesuscripcion] = useState(null);
   const [form,      setForm]      = useState(EMPTY_FORM);
   const [editId,    setEditId]    = useState(null);
   const [saving,    setSaving]    = useState(false);
@@ -203,6 +204,25 @@ export default function Ofertas() {
     }
   }
 
+  async function cambiarEstadoInscripcion(inscripcionId, estado) {
+    try {
+      await api.patch(`/inscripciones/${inscripcionId}/estado`, { estado });
+      show(estado === 'aceptado' ? 'Inscripción aceptada' : 'Inscripción rechazada');
+      const [{ data: nuevasInscripciones }, { data: nuevasOfertas }] = await Promise.all([
+        api.get('/inscripciones'),
+        api.get('/ofertas')
+      ]);
+      setInscripciones(nuevasInscripciones);
+      setOfertas(nuevasOfertas);
+      if (adminDetModal) {
+        const ofertaActualizada = nuevasOfertas.find(o => o.id_oferta === adminDetModal.id_oferta);
+        if (ofertaActualizada) setAdminDetModal(ofertaActualizada);
+      }
+    } catch (e) {
+      show(e.response?.data?.error || 'Error al actualizar inscripción', 'error');
+    }
+  }
+
   async function inscribirse(id) {
     try {
       await api.post('/inscripciones', { id_oferta: id });
@@ -213,12 +233,10 @@ export default function Ofertas() {
   }
 
   async function desuscribirse(inscripcionId) {
-    const confirmar = window.confirm('¿Quieres desuscribirte de esta oferta?');
-    if (!confirmar) return;
-
     try {
       await api.delete(`/inscripciones/${inscripcionId}`);
       show('Te desuscribiste de la oferta');
+      setConfirmDesuscripcion(null);
       load();
     } catch (e) {
       show(e.response?.data?.error || 'Error al desuscribirse', 'error');
@@ -314,7 +332,10 @@ export default function Ofertas() {
                     o={o}
                     user={perfil || user}
                     inscripcion={inscripcion}
-                    onDesuscribir={() => desuscribirse(inscripcion.id_inscripcion)}
+                    onDesuscribir={() => setConfirmDesuscripcion({
+                      id: inscripcion.id_inscripcion,
+                      titulo: o.titulo
+                    })}
                     onVer={() => setDetModal(o)}
                   />
                 );
@@ -366,6 +387,7 @@ export default function Ofertas() {
           inscritos={inscripciones.filter(i => i.id_oferta === adminDetModal.id_oferta && i.estado !== 'rechazado')}
           onClose={() => setAdminDetModal(null)}
           onAcreditar={acreditarHoras}
+          onCambiarEstado={cambiarEstadoInscripcion}
           onEliminar={eliminarInscripcion}
         />
       )}
@@ -373,6 +395,36 @@ export default function Ofertas() {
       {/* MODAL DETALLE (estudiante) */}
       {detModal && (
         <DetalleModal o={detModal} user={perfil || user} onClose={() => setDetModal(null)} onInscribir={inscribirse} />
+      )}
+
+      {confirmDesuscripcion && (
+        <Modal
+          open
+          title="Confirmar desuscripción"
+          onClose={() => setConfirmDesuscripcion(null)}
+          width={420}
+          footer={<>
+            <Btn variant="outline" onClick={() => setConfirmDesuscripcion(null)}>Cancelar</Btn>
+            <Btn
+              variant="danger"
+              onClick={() => desuscribirse(confirmDesuscripcion.id)}
+              style={{
+                background: 'rgba(217,48,37,.08)',
+                color: '#b52920',
+                border: '1px solid rgba(217,48,37,.30)'
+              }}
+            >
+              Desuscribirme
+            </Btn>
+          </>}
+        >
+          <div style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.6 }}>
+            ¿Estás seguro de que quieres desuscribirte de esta oferta?
+          </div>
+          <div style={{ marginTop: 10, fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
+            {confirmDesuscripcion.titulo}
+          </div>
+        </Modal>
       )}
 
       <Toast toast={toast} />
@@ -445,7 +497,15 @@ function AdminOfertaCard({ o, onOpen, onEdit, onToggle }) {
 
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
             <Btn variant="outline" onClick={e => { e.stopPropagation(); onEdit(); }}>Editar</Btn>
-            <Btn variant={o.activo ? 'danger' : 'green'} onClick={e => { e.stopPropagation(); onToggle(); }}>
+            <Btn
+              variant={o.activo ? 'danger' : 'green'}
+              onClick={e => { e.stopPropagation(); onToggle(); }}
+              style={o.activo ? {
+                background: 'rgba(217,48,37,.08)',
+                color: '#b52920',
+                border: '1px solid rgba(217,48,37,.30)'
+              } : undefined}
+            >
               {o.activo ? 'Desactivar' : 'Activar'}
             </Btn>
           </div>
@@ -455,7 +515,7 @@ function AdminOfertaCard({ o, onOpen, onEdit, onToggle }) {
   );
 }
 
-function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onEliminar }) {
+function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onCambiarEstado, onEliminar }) {
   const [query, setQuery] = useState('');
   const inscritosKey = inscritos
     .map(i => `${i.id_inscripcion}:${i.horas_acreditadas ?? ''}:${i.horas_acreditar ?? ''}`)
@@ -528,6 +588,8 @@ function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onEliminar })
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
           {inscritosFiltrados.map(i => {
             const horasAcreditadas = i.estado === 'finalizado' || i.horas_acreditadas !== null && i.horas_acreditadas !== undefined;
+            const estaPendiente = i.estado === 'pendiente';
+            const estaAceptado = i.estado === 'aceptado';
             return (
             <div key={i.id_inscripcion} style={{
               border:'1px solid rgba(10,27,78,.10)',
@@ -561,55 +623,81 @@ function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onEliminar })
 
                 <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap', justifyContent:'flex-end' }}>
                   <Badge type={i.estado}>{i.estado}</Badge>
-                  <input
-                    type="number"
-                    min="0"
-                    max={i.horas_oferta || o.horas_acreditar}
-                    value={horasPorInscripcion[i.id_inscripcion] ?? ''}
-                    disabled={i.estado !== 'aceptado'}
-                    onChange={e => setHoras(i.id_inscripcion, e.target.value)}
-                    title="Horas a acreditar"
-                    style={{
-                      width:70,
-                      background: i.estado === 'aceptado' ? '#fff' : 'rgba(10,27,78,.04)',
-                      border:'1px solid var(--border2)',
-                      borderRadius:6,
-                      padding:'6px 8px',
-                      fontFamily:'inherit',
-                      fontSize:12,
-                      color: i.estado === 'aceptado' ? 'var(--text)' : 'var(--text3)',
-                      cursor: i.estado === 'aceptado' ? 'text' : 'not-allowed'
-                    }}
-                  />
-                  <Btn
-                    variant="green"
-                    onClick={() => onAcreditar(i.id_inscripcion, horasPorInscripcion[i.id_inscripcion])}
-                    disabled={i.estado !== 'aceptado'}
-                    style={{ padding:'6px 10px' }}
-                  >
-                    Acreditar
-                  </Btn>
-                  <button
-                    type="button"
-                    onClick={() => onEliminar(i.id_inscripcion)}
-                    disabled={horasAcreditadas}
-                    title={horasAcreditadas ? 'No se puede eliminar una inscripción con horas acreditadas' : 'Eliminar inscripción'}
-                    style={{
-                      width:30,
-                      height:30,
-                      borderRadius:6,
-                      border: horasAcreditadas ? '1px solid rgba(10,27,78,.12)' : '1px solid rgba(217,48,37,.30)',
-                      background: horasAcreditadas ? 'rgba(10,27,78,.04)' : 'none',
-                      color: horasAcreditadas ? 'var(--text3)' : '#b52920',
-                      fontSize:16,
-                      fontWeight:700,
-                      cursor: horasAcreditadas ? 'not-allowed' : 'pointer',
-                      opacity: horasAcreditadas ? .65 : 1,
-                      lineHeight:1
-                    }}
-                  >
-                    X
-                  </button>
+                  {estaPendiente ? (
+                    <>
+                      <Btn
+                        variant="green"
+                        onClick={() => onCambiarEstado(i.id_inscripcion, 'aceptado')}
+                        style={{ padding:'6px 10px' }}
+                      >
+                        Aceptar
+                      </Btn>
+                      <Btn
+                        variant="danger"
+                        onClick={() => onCambiarEstado(i.id_inscripcion, 'rechazado')}
+                        style={{
+                          padding:'6px 10px',
+                          background: 'rgba(217,48,37,.08)',
+                          color: '#b52920',
+                          border: '1px solid rgba(217,48,37,.30)'
+                        }}
+                      >
+                        Rechazar
+                      </Btn>
+                    </>
+                  ) : (
+                    <>
+                      <input
+                        type="number"
+                        min="0"
+                        max={i.horas_oferta || o.horas_acreditar}
+                        value={horasPorInscripcion[i.id_inscripcion] ?? ''}
+                        disabled={!estaAceptado}
+                        onChange={e => setHoras(i.id_inscripcion, e.target.value)}
+                        title="Horas a acreditar"
+                        style={{
+                          width:70,
+                          background: estaAceptado ? '#fff' : 'rgba(10,27,78,.04)',
+                          border:'1px solid var(--border2)',
+                          borderRadius:6,
+                          padding:'6px 8px',
+                          fontFamily:'inherit',
+                          fontSize:12,
+                          color: estaAceptado ? 'var(--text)' : 'var(--text3)',
+                          cursor: estaAceptado ? 'text' : 'not-allowed'
+                        }}
+                      />
+                      <Btn
+                        variant="green"
+                        onClick={() => onAcreditar(i.id_inscripcion, horasPorInscripcion[i.id_inscripcion])}
+                        disabled={!estaAceptado}
+                        style={{ padding:'6px 10px' }}
+                      >
+                        Acreditar
+                      </Btn>
+                      <button
+                        type="button"
+                        onClick={() => onEliminar(i.id_inscripcion)}
+                        disabled={horasAcreditadas}
+                        title={horasAcreditadas ? 'No se puede eliminar una inscripción con horas acreditadas' : 'Eliminar inscripción'}
+                        style={{
+                          width:30,
+                          height:30,
+                          borderRadius:6,
+                          border: horasAcreditadas ? '1px solid rgba(10,27,78,.12)' : '1px solid rgba(217,48,37,.30)',
+                          background: horasAcreditadas ? 'rgba(10,27,78,.04)' : 'none',
+                          color: horasAcreditadas ? 'var(--text3)' : '#b52920',
+                          fontSize:16,
+                          fontWeight:700,
+                          cursor: horasAcreditadas ? 'not-allowed' : 'pointer',
+                          opacity: horasAcreditadas ? .65 : 1,
+                          lineHeight:1
+                        }}
+                      >
+                        X
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

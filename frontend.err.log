@@ -1,0 +1,158 @@
+[2m10:22:51 a. m.[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled error] [1mReferenceError[22m: Btn is not defined
+[39m > src/pages/Inscripciones.jsx:118:45
+    116 |                    </div>
+    117 |                  )}
+    118 |                  {i.estado === 'aceptado' && <Btn variant="outline" onClick={() => cambiar(i.id_inscripcion, 'finaliza...
+        |                                               ^
+    119 |                  {i.estado === 'finalizado' && <span style={{ fontSize: 12, color: 'var(--text3)' }}>Completado</span>}
+    120 |                  {i.estado === 'rechazado' && <span style={{ fontSize: 12, color: '#8d97b8' }}>Rechazado</span>}
+ > Inscripciones src/pages/Inscripciones.jsx:103:20
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:19
+ > renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:21
+ > updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:18
+ > beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:17
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:21
+ > workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:40
+
+[2m10:22:51 a. m.[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mAn error occurred in the <Inscripciones> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+[2m10:27:36 a. m.[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled error] [1mReferenceError[22m: Btn is not defined
+[39m > src/pages/Dashboard.jsx:232:47
+    230 |                <Td>
+    231 |                  {i.estado === 'pendiente'  && <Btn variant="green"   onClick={() => cambiarEstado(i.id_inscripcion, '...
+    232 |                  {i.estado === 'aceptado'   && <Btn variant="outline" onClick={() => cambiarEstado(i.id_inscripcion, '...
+        |                                                 ^
+    233 |                  {i.estado === 'finalizado' && <span style={{ fontSize: 12, color: 'var(--text3)' }}>Completado</span>}
+    234 |                </Td>
+ > Dashboard src/pages/Dashboard.jsx:224:21
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:19
+ > renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:21
+ > updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:18
+ > beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:17
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:21
+ > workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:40
+
+[2m10:27:36 a. m.[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mAn error occurred in the <Dashboard> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+[2m10:32:07 a. m.[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled error] [1mReferenceError[22m: Btn is not defined
+[39m > src/pages/Dashboard.jsx:232:47
+    230 |                <Td>
+    231 |                  {i.estado === 'pendiente'  && <Btn variant="green"   onClick={() => cambiarEstado(i.id_inscripcion, '...
+    232 |                  {i.estado === 'aceptado'   && <Btn variant="outline" onClick={() => cambiarEstado(i.id_inscripcion, '...
+        |                                                 ^
+    233 |                  {i.estado === 'finalizado' && <span style={{ fontSize: 12, color: 'var(--text3)' }}>Completado</span>}
+    234 |                </Td>
+ > Dashboard src/pages/Dashboard.jsx:224:21
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:19
+ > renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:21
+ > updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:18
+ > beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:17
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:21
+ > workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:40
+
+[2m10:32:07 a. m.[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mAn error occurred in the <Dashboard> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+[2m10:32:09 a. m.[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled error] [1mReferenceError[22m: Btn is not defined
+[39m > src/pages/Dashboard.jsx:232:47
+    230 |                <Td>
+    231 |                  {i.estado === 'pendiente'  && <Btn variant="green"   onClick={() => cambiarEstado(i.id_inscripcion, '...
+    232 |                  {i.estado === 'aceptado'   && <Btn variant="outline" onClick={() => cambiarEstado(i.id_inscripcion, '...
+        |                                                 ^
+    233 |                  {i.estado === 'finalizado' && <span style={{ fontSize: 12, color: 'var(--text3)' }}>Completado</span>}
+    234 |                </Td>
+ > Dashboard src/pages/Dashboard.jsx:224:21
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:19
+ > renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:21
+ > updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:18
+ > beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:17
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:21
+ > workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:40
+
+[2m10:32:09 a. m.[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mAn error occurred in the <Dashboard> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+[2m10:32:10 a. m.[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled error] [1mReferenceError[22m: Btn is not defined
+[39m > src/pages/Dashboard.jsx:232:47
+    230 |                <Td>
+    231 |                  {i.estado === 'pendiente'  && <Btn variant="green"   onClick={() => cambiarEstado(i.id_inscripcion, '...
+    232 |                  {i.estado === 'aceptado'   && <Btn variant="outline" onClick={() => cambiarEstado(i.id_inscripcion, '...
+        |                                                 ^
+    233 |                  {i.estado === 'finalizado' && <span style={{ fontSize: 12, color: 'var(--text3)' }}>Completado</span>}
+    234 |                </Td>
+ > Dashboard src/pages/Dashboard.jsx:224:21
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:19
+ > renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:21
+ > updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:18
+ > beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:17
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:21
+ > workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:40
+
+[2m10:32:10 a. m.[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mAn error occurred in the <Dashboard> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+[2m10:32:13 a. m.[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled error] [1mReferenceError[22m: Btn is not defined
+[39m > src/pages/Dashboard.jsx:232:47
+    230 |                <Td>
+    231 |                  {i.estado === 'pendiente'  && <Btn variant="green"   onClick={() => cambiarEstado(i.id_inscripcion, '...
+    232 |                  {i.estado === 'aceptado'   && <Btn variant="outline" onClick={() => cambiarEstado(i.id_inscripcion, '...
+        |                                                 ^
+    233 |                  {i.estado === 'finalizado' && <span style={{ fontSize: 12, color: 'var(--text3)' }}>Completado</span>}
+    234 |                </Td>
+ > Dashboard src/pages/Dashboard.jsx:224:21
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:19
+ > renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:21
+ > updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:18
+ > beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:17
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:21
+ > workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:40
+
+[2m10:32:13 a. m.[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mAn error occurred in the <Dashboard> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+[2m10:35:19 a. m.[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled error] [1mReferenceError[22m: Btn is not defined
+[39m > src/pages/Dashboard.jsx:232:47
+    230 |                <Td>
+    231 |                  {i.estado === 'pendiente'  && <Btn variant="green"   onClick={() => cambiarEstado(i.id_inscripcion, '...
+    232 |                  {i.estado === 'aceptado'   && <Btn variant="outline" onClick={() => cambiarEstado(i.id_inscripcion, '...
+        |                                                 ^
+    233 |                  {i.estado === 'finalizado' && <span style={{ fontSize: 12, color: 'var(--text3)' }}>Completado</span>}
+    234 |                </Td>
+ > Dashboard src/pages/Dashboard.jsx:224:21
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:19
+ > renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:21
+ > updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:18
+ > beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:17
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:21
+ > workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:40
+
+[2m10:35:19 a. m.[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mAn error occurred in the <Dashboard> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+[2m12:55:37 p. m.[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[vite] Failed to reload /src/pages/Login.jsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+[2m12:55:37 p. m.[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[vite] Failed to reload /src/pages/Login.jsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+[2m12:55:37 p. m.[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[vite] Failed to reload /src/pages/Login.jsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+[2m12:55:37 p. m.[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[vite] Failed to reload /src/pages/Login.jsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
