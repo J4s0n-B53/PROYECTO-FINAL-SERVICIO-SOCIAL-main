@@ -2,10 +2,10 @@
 import { useAuth } from '../context/AuthContext';
 
 const ADMIN_MENU = [
-  { to: '/dashboard',     label: 'Dashboard', },
-  { to: '/ofertas',       label: 'Ofertas', },
-  { to: '/inscripciones', label: 'Inscripciones', },
-  { to: '/usuarios',      label: 'Usuarios', },
+  { to: '/dashboard',     label: 'Dashboard',     icon: '📊' },
+  { to: '/ofertas',       label: 'Ofertas',       icon: '💼' },
+  { to: '/inscripciones', label: 'Inscripciones', icon: '📋' },
+  { to: '/usuarios',      label: 'Usuarios',      icon: '👥' },
 ];
 const STUDENT_MENU = [
   { to: '/ofertas',           label: 'Ofertas disponibles', icon: '💼' },
@@ -119,7 +119,7 @@ export default function Layout() {
               fontWeight: isActive ? 600 : 400,
               transition: 'background .15s, color .15s'
             })}>
-              <span style={{ fontSize: 15, opacity: 0.85 }}>{item.icon}</span>
+              <span style={{ width: 16, fontSize: 15, opacity: 0.85, textAlign: 'center', flexShrink: 0 }}>{item.icon}</span>
               <span>{item.label}</span>
             </NavLink>
           ))}

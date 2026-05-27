@@ -229,7 +229,7 @@ export default function Perfil() {
             ['Carrera',            perfil.nombre_carrera || 'No asignada'],
             ['Facultad',           perfil.nombre_facultad || '—'],
             ['Materias aprobadas', `${perfil.materias_aprobadas} / 60`],
-            ['Elegibilidad',       elegible ? '✓ Apto para servicio' : 'Pendiente (mín. 30 materias)'],
+            ['Elegibilidad',       elegible ? '✓ Apto para servicio' : '✕ No apto para servicio'],
           ].map(([l, v]) => (
             <div key={l}>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 5, fontWeight: 600 }}>{l}</div>

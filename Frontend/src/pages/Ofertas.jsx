@@ -43,6 +43,147 @@ function formatTime(value) {
   return value ? String(value).slice(0, 5) : '';
 }
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function formatLongDate(value) {
+  if (!value) return '&mdash;';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return escapeHtml(formatDate(value) || value);
+  return date.toLocaleDateString('es-SV', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function generarPDFOferta({ oferta, participantes }) {
+  const hoy = new Date().toLocaleDateString('es-SV', { year: 'numeric', month: 'long', day: 'numeric' });
+  const codigo = `USO-SS-OFERTA-${oferta.id_oferta.toString().padStart(5, '0')}`;
+  const logoUrl = `${window.location.origin}/logo-uso.png`;
+  const totalHoras = participantes.reduce((acc, p) => acc + Number(p.horas_asignadas || 0), 0);
+
+  const filas = participantes.map((p, index) => `
+    <tr>
+      <td style="text-align:center">${index + 1}</td>
+      <td><strong>${escapeHtml(p.estudiante_nombre)}</strong><br/><span>${escapeHtml(p.correo_institucional || '')}</span></td>
+      <td>${escapeHtml(p.nombre_carrera || p.carrera || p.estudiante_carrera || 'Carrera no asignada')}</td>
+      <td style="text-align:center;font-weight:700;color:#1a3a6b">${escapeHtml(p.horas_asignadas)}h</td>
+    </tr>`).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"/>
+<title>Constancia de Oferta - ${escapeHtml(oferta.titulo)}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Source Sans 3',sans-serif;background:#fff;color:#222}
+  .wrap{max-width:760px;margin:28px auto;border:3px solid #1a3a6b;border-radius:4px;overflow:hidden}
+  .top-green{background:#2c6e2f;height:8px}
+  .top-blue{background:#1a3a6b;padding:6px 0;display:flex;justify-content:center}
+  .top-blue span{color:#fff;font-size:11px;letter-spacing:1px;opacity:.75}
+  .header-main{padding:26px 38px 18px;display:flex;align-items:center;gap:20px;border-bottom:3px solid #2c6e2f}
+  .logo-box{width:68px;height:68px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .logo-box img{width:68px;height:68px;object-fit:contain;display:block}
+  .univ-name{font-family:'Playfair Display',serif;color:#1a3a6b;font-size:22px;font-weight:600;line-height:1.2;margin:0}
+  .univ-sub{color:#2c6e2f;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+  .body{padding:30px 38px 28px}
+  .doc-title{font-family:'Playfair Display',serif;color:#1a3a6b;font-size:20px;font-weight:600;text-align:center;letter-spacing:1px;margin:0 0 6px}
+  .doc-sub{text-align:center;color:#555;font-size:13px;margin:0 0 22px}
+  .body-text{color:#222;font-size:14px;line-height:1.7;text-align:justify;margin-bottom:22px}
+  .body-text strong{color:#1a3a6b}
+  .info-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-bottom:24px}
+  .info-table tr:nth-child(even) td{background:#f0f4fb}
+  .info-table td{padding:9px 14px;border:1px solid #d0dae8;vertical-align:top}
+  .info-table td:first-child{font-weight:600;color:#1a3a6b;white-space:nowrap;width:34%}
+  .section-title{color:#fff;background:#1a3a6b;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:7px 14px;border-radius:3px 3px 0 0}
+  .students-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:26px}
+  .students-table th{background:#2c6e2f;color:#fff;padding:8px 10px;text-align:left;font-weight:600;font-size:12px}
+  .students-table th:first-child,.students-table th:last-child{text-align:center}
+  .students-table td{border:1px solid #d0dae8;padding:8px 10px;color:#222;vertical-align:top}
+  .students-table td span{color:#6b7a99;font-size:11.5px}
+  .students-table tr:nth-child(even) td{background:#f6f9f2}
+  .summary{background:#f0f4fb;border:1px solid #d0dae8;border-radius:4px;padding:10px 14px;font-size:13px;margin-bottom:24px;color:#1a3a6b;font-weight:600}
+  .footer-line{border-top:2px solid #2c6e2f;padding-top:20px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px}
+  .footer-date{color:#555;font-size:12px}
+  .signature-block{text-align:center;font-size:12px;color:#555}
+  .signature-line{width:160px;border-top:1.5px solid #1a3a6b;margin:0 auto 4px}
+  .sig-name{color:#1a3a6b;font-weight:600;font-size:12px}
+  .foot-code{background:#f0f4fb;border-top:1px solid #d0dae8;padding:8px 38px;font-size:10px;color:#6b7a99;text-align:right}
+  .bot-green{background:#2c6e2f;height:6px}
+  .bot-blue{background:#1a3a6b;height:10px}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+  window.addEventListener('load', function() {
+    var el = document.querySelector('.wrap');
+    var opt = {
+      margin: [6, 6, 6, 6],
+      filename: document.title + '.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(el).save();
+  });
+</script></head><body>
+<div class="wrap">
+  <div class="top-green"></div>
+  <div class="top-blue"><span>DOCUMENTO OFICIAL</span></div>
+  <div class="header-main">
+    <div class="logo-box"><img src="${logoUrl}" alt="Logo USO"/></div>
+    <div>
+      <p class="univ-name">Universidad de Sonsonate</p>
+      <p class="univ-sub">Sistema de Servicio Social</p>
+    </div>
+  </div>
+  <div class="body">
+    <p class="doc-title">CONSTANCIA DE ACTIVIDAD DE SERVICIO SOCIAL</p>
+    <p class="doc-sub">Reporte de participantes y horas asignadas</p>
+    <p class="body-text">
+      La <strong>Universidad de Sonsonate</strong>, a trav&eacute;s del Sistema de Servicio Social,
+      hace constar la informaci&oacute;n registrada para la actividad
+      <strong>${escapeHtml(oferta.titulo)}</strong>, incluyendo los estudiantes participantes
+      y las horas asignadas a cada uno.
+    </p>
+    <table class="info-table">
+      <tr><td>Fecha de creaci&oacute;n de oferta</td><td>${formatLongDate(oferta.created_at)}</td></tr>
+      <tr><td>Nombre de actividad</td><td>${escapeHtml(oferta.titulo)}</td></tr>
+      <tr><td>Descripci&oacute;n</td><td>${oferta.descripcion ? escapeHtml(oferta.descripcion) : '&mdash;'}</td></tr>
+      <tr><td>Fecha de inicio</td><td>${formatLongDate(oferta.fecha_inicio)}</td></tr>
+      <tr><td>Fecha de finalizaci&oacute;n</td><td>${formatLongDate(oferta.fecha_fin)}</td></tr>
+      <tr><td>Hora de inicio</td><td>${escapeHtml(formatTime(oferta.hora_inicio) || '--:--')}</td></tr>
+      <tr><td>Hora de finalizaci&oacute;n</td><td>${escapeHtml(formatTime(oferta.hora_fin) || '--:--')}</td></tr>
+    </table>
+    <p class="section-title">Estudiantes participantes</p>
+    <table class="students-table">
+      <thead><tr><th>#</th><th>Estudiante</th><th>Carrera</th><th>Horas</th></tr></thead>
+      <tbody>${filas}</tbody>
+    </table>
+    <div class="summary">Total: ${participantes.length} estudiante(s) participante(s) | ${totalHoras} horas asignadas</div>
+    <div class="footer-line">
+      <div class="footer-date">Sonsonate, El Salvador &mdash; ${hoy}</div>
+      <div class="signature-block">
+        <div class="signature-line"></div>
+        <div class="sig-name">Coordinaci&oacute;n de Servicio Social</div>
+        <div>Universidad de Sonsonate</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot-code">C&oacute;digo: ${codigo} | Emitido el ${hoy}</div>
+  <div class="bot-green"></div>
+  <div class="bot-blue"></div>
+</div></body></html>`;
+
+  const v = window.open('', '_blank');
+  v.document.write(html);
+  v.document.close();
+}
+
 function timeToInput(value) {
   return value ? String(value).slice(0, 5) : '';
 }
@@ -648,6 +789,7 @@ function AdminOfertaCard({ o, onOpen, onEdit, onToggle }) {
 
 function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onCambiarEstado, onEliminar }) {
   const [query, setQuery] = useState('');
+  const [confirmEliminar, setConfirmEliminar] = useState(null);
   const inscritosKey = inscritos
     .map(i => `${i.id_inscripcion}:${i.horas_acreditadas ?? ''}:${i.horas_acreditar ?? ''}`)
     .join('|');
@@ -674,16 +816,38 @@ function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onCambiarEsta
     const texto = `${i.estudiante_nombre} ${i.correo_institucional} ${carrera}`.toLowerCase();
     return !query || texto.includes(query.trim().toLowerCase());
   });
+  const participantesReporte = inscritos
+    .filter(i => i.estado === 'finalizado')
+    .map(i => ({
+      ...i,
+      horas_asignadas: horasPorInscripcion[i.id_inscripcion] ?? i.horas_acreditadas ?? i.horas_acreditar ?? o.horas_acreditar
+    }));
+
+  function descargarConstanciaOferta() {
+    generarPDFOferta({ oferta: o, participantes: participantesReporte });
+  }
 
   return (
-    <Modal open title={`Inscritos en ${o.titulo}`} onClose={onClose} width={760}
-      footer={<Btn variant="outline" onClick={onClose}>Cerrar</Btn>}
-    >
-      <div style={{ fontSize:13, color:'var(--text2)', marginBottom:16 }}>
-        {inscritos.length}/{o.cupo_maximo} estudiantes inscritos
-      </div>
+    <>
+      <Modal open title={`Inscritos en ${o.titulo}`} onClose={onClose} width={760}
+        footer={<Btn variant="outline" onClick={onClose}>Cerrar</Btn>}
+      >
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, marginBottom:16 }}>
+          <div style={{ fontSize:13, color:'var(--text2)' }}>
+            {inscritos.length}/{o.cupo_maximo} estudiantes inscritos
+          </div>
+          <Btn
+            variant="accent"
+            onClick={descargarConstanciaOferta}
+            disabled={participantesReporte.length === 0}
+            style={{ whiteSpace:'nowrap' }}
+          >
+            <span aria-hidden="true">{'\uD83D\uDCC4'}</span>
+            Constancia de actividad
+          </Btn>
+        </div>
 
-      <div style={{ position:'relative', marginBottom:14 }}>
+        <div style={{ position:'relative', marginBottom:14 }}>
         <span style={{
           position:'absolute',
           left:12,
@@ -808,7 +972,7 @@ function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onCambiarEsta
                       </Btn>
                       <button
                         type="button"
-                        onClick={() => onEliminar(i.id_inscripcion)}
+                        onClick={() => setConfirmEliminar(i)}
                         disabled={horasAcreditadas}
                         title={horasAcreditadas ? 'No se puede eliminar una inscripción con horas acreditadas' : 'Eliminar inscripción'}
                         style={{
@@ -835,8 +999,47 @@ function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onCambiarEsta
           );
           })}
         </div>
+        )}
+      </Modal>
+
+      {confirmEliminar && (
+        <Modal
+          open
+          title="Eliminar inscripción"
+          onClose={() => setConfirmEliminar(null)}
+          width={420}
+          footer={
+            <>
+              <Btn
+                variant="danger"
+                onClick={() => setConfirmEliminar(null)}
+                style={{
+                  background: 'rgba(217,48,37,.08)',
+                  color: '#b52920',
+                  border: '1px solid rgba(217,48,37,.30)'
+                }}
+              >
+                Cancelar
+              </Btn>
+              <Btn
+                variant="outline"
+                onClick={async () => {
+                  await onEliminar(confirmEliminar.id_inscripcion);
+                  setConfirmEliminar(null);
+                }}
+              >
+                Aceptar
+              </Btn>
+            </>
+          }
+        >
+          <p style={{ fontSize:13, color:'var(--text2)', lineHeight:1.6, margin:0 }}>
+            ¿Estás seguro de eliminar la inscripción de{' '}
+            <strong style={{ color:'var(--text)' }}>{confirmEliminar.estudiante_nombre}</strong>?
+          </p>
+        </Modal>
       )}
-    </Modal>
+    </>
   );
 }
 
@@ -868,6 +1071,31 @@ function OfertaCard({ o, user, inscripcion, onVer, onDesuscribir }) {
               : cupoLleno
                 ? 'Cupo máximo alcanzado'
                 : 'Inscribirme';
+  const estadoButtonStyle = estaPendiente
+    ? {
+        background: 'rgba(212,143,10,.12)',
+        border: '1px solid rgba(212,143,10,.30)',
+        color: 'var(--amber)'
+      }
+    : estaFinalizado
+      ? {
+          background: 'rgba(107,63,160,.12)',
+          border: '1px solid rgba(107,63,160,.25)',
+          color: 'var(--purple)'
+        }
+      : estaRechazado
+        ? {
+            background: 'rgba(217,48,37,.08)',
+            border: '1px solid rgba(217,48,37,.30)',
+            color: '#b52920'
+          }
+      : estaInscrito
+      ? {
+          background: 'rgba(15,158,110,.10)',
+          border: '1px solid rgba(15,158,110,.25)',
+          color: 'var(--green)'
+        }
+      : null;
 
   return (
     <div style={{
@@ -908,11 +1136,11 @@ function OfertaCard({ o, user, inscripcion, onVer, onDesuscribir }) {
           <div style={{ display:'grid', gridTemplateColumns: estaPendiente ? '1fr 1fr' : '1fr', gap:8 }}>
             <button disabled={bloqueado} onClick={e=>{e.stopPropagation(); if (!bloqueado) onVer();}} style={{
             width:'100%', minHeight:42,
-            background: estaInscrito ? 'rgba(15,158,110,.10)' : cupoLleno ? 'rgba(217,48,37,.08)' : (!tieneAcceso || horasCompletadas) ? 'rgba(10,27,78,.06)' : 'none',
-            border: estaInscrito ? '1px solid rgba(15,158,110,.25)' : cupoLleno ? '1px solid rgba(217,48,37,.22)' : (!tieneAcceso || horasCompletadas) ? '1px solid rgba(10,27,78,.12)' : '1px solid rgba(10,27,78,.20)',
+            background: estadoButtonStyle?.background || (cupoLleno ? 'rgba(217,48,37,.08)' : (!tieneAcceso || horasCompletadas) ? 'rgba(10,27,78,.06)' : 'none'),
+            border: estadoButtonStyle?.border || (cupoLleno ? '1px solid rgba(217,48,37,.22)' : (!tieneAcceso || horasCompletadas) ? '1px solid rgba(10,27,78,.12)' : '1px solid rgba(10,27,78,.20)'),
             borderRadius:7, padding:'9px', fontFamily:'inherit', fontSize:13,
             fontWeight:600,
-            color: estaInscrito ? 'var(--green)' : cupoLleno ? '#b52920' : (!tieneAcceso || horasCompletadas) ? 'var(--text3)' : '#0A1B4E',
+            color: estadoButtonStyle?.color || (cupoLleno ? '#b52920' : (!tieneAcceso || horasCompletadas) ? 'var(--text3)' : '#0A1B4E'),
             cursor: bloqueado ? 'not-allowed' : 'pointer',
             opacity: bloqueado ? .85 : 1,
             transition:'.15s'
