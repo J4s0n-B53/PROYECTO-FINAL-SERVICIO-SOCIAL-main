@@ -25,7 +25,7 @@ function ProgressBar({ label, value, max, colorA, colorB }) {
 }
 
 /* ── Generador PDF global — diseño constancia institucional ─────────────── */
-function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
+function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta, horasAmbientales = 0, metaAmbiental = 25, ambientalCumplido = false }) {
   const hoy    = new Date().toLocaleDateString('es-SV', { year: 'numeric', month: 'long', day: 'numeric' });
   const codigo = `USO-SS-GLOBAL-${e.id_usuario.toString().padStart(5, '0')}`;
   const logoUrl = `${window.location.origin}/logo-uso.png`;
@@ -40,7 +40,7 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
 
   const html = `<!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8"/>
-<title>Constancia Global de Servicio Social</title>
+<title>Constancia de Finalizacion de Servicio Social</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet"/>
 <style>
@@ -109,7 +109,7 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
   </div>
 
   <div class="body">
-    <p class="doc-title">CONSTANCIA GLOBAL DE SERVICIO SOCIAL</p>
+    <p class="doc-title">CONSTANCIA DE FINALIZACION DE SERVICIO SOCIAL</p>
     <p class="doc-sub">Documento oficial de culminación — ${totalHoras} horas acreditadas</p>
 
     <div class="badge"><span>✓ Servicio Social Completado</span></div>
@@ -128,6 +128,7 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
       <tr><td>Carrera</td>              <td>${e.nombre_carrera || '—'}</td></tr>
       <tr><td>Facultad</td>             <td>${e.nombre_facultad || '—'}</td></tr>
       <tr><td>Materias aprobadas</td>   <td>${e.materias_aprobadas} / 60</td></tr>
+      <tr><td>Requisito ambiental</td>  <td><strong>${horasAmbientales} horas ${ambientalCumplido ? '✓' : ''}</strong></td></tr>
       <tr><td>Total de horas</td>       <td><strong>${totalHoras} horas ✓</strong></td></tr>
     </table>
 
@@ -182,7 +183,10 @@ export default function Perfil() {
   const horasAcred = Number(perfil.horas_acumuladas ?? (horasPorOfertas + Number(perfil.horas_manuales ?? 0)));
   const elegible   = perfil.materias_aprobadas >= 30;
   const META       = 500;
-  const completado = horasAcred >= META;
+  const META_AMBIENTAL = 25;
+  const horasAmbientales = Number(perfil.horas_ambientales ?? 0);
+  const ambientalCumplido = Boolean(perfil.ambiental_cumplido) || horasAmbientales >= META_AMBIENTAL;
+  const completado = horasAcred >= META && ambientalCumplido;
 
   async function handleReporteGlobal() {
     setLoadingRep(true);
@@ -230,10 +234,11 @@ export default function Perfil() {
             ['Facultad',           perfil.nombre_facultad || '—'],
             ['Materias aprobadas', `${perfil.materias_aprobadas} / 60`],
             ['Elegibilidad',       elegible ? '✓ Apto para servicio' : '✕ No apto para servicio'],
+            ['Servicio ambiental', ambientalCumplido ? '✓ Cumplido' : '✕ Pendiente'],
           ].map(([l, v]) => (
             <div key={l}>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 5, fontWeight: 600 }}>{l}</div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: l === 'Elegibilidad' ? (elegible ? '#6fe0b8' : '#f5c46a') : 'rgba(255,255,255,0.85)' }}>{v}</div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: l === 'Elegibilidad' ? (elegible ? '#6fe0b8' : '#f5c46a') : l === 'Servicio ambiental' ? (ambientalCumplido ? '#6fe0b8' : '#f5c46a') : 'rgba(255,255,255,0.85)' }}>{v}</div>
             </div>
           ))}
         </div>
@@ -241,6 +246,7 @@ export default function Perfil() {
         {/* Progress bars */}
         <ProgressBar label="Avance académico"                    value={perfil.materias_aprobadas} max={60}  colorA="#c066ff" colorB="#4f8cff" />
         <ProgressBar label="Horas de servicio social acreditadas" value={horasAcred}               max={META} colorA="#0fce8a" colorB="#0be0b8" />
+        <ProgressBar label="Horas de servicio ambiental"          value={Math.min(horasAmbientales, META_AMBIENTAL)} max={META_AMBIENTAL} colorA="#2fb66d" colorB="#8ee08f" />
 
         {/* Botón constancia global — solo visible al completar 500h */}
         {completado && (

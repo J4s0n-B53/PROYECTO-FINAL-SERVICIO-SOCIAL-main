@@ -1,5 +1,10 @@
 const pool = require('../database/connection');
 const MAX_HORAS_OFERTA = 500;
+const HORAS_AMBIENTALES = 25;
+
+function toBoolean(value) {
+  return value === true || value === 1 || value === '1' || value === 'true';
+}
 
 function validarOferta({ horas_acreditar, cupo_maximo }) {
   const horas = Number(horas_acreditar);
@@ -46,38 +51,42 @@ async function getById(id) {
 }
 
 async function create({ titulo, descripcion, ubicacion, horario, fecha_inicio, fecha_fin, hora_inicio, hora_fin, horas_acreditar,
-                        imagen_url, cupo_maximo, id_carrera }, adminId) {
-  validarOferta({ horas_acreditar, cupo_maximo });
+                        imagen_url, cupo_maximo, id_carrera, es_ambiental }, adminId) {
+  const ambiental = toBoolean(es_ambiental);
+  const horas = ambiental ? HORAS_AMBIENTALES : horas_acreditar;
+  validarOferta({ horas_acreditar: horas, cupo_maximo });
   validarFechas({ fecha_inicio, fecha_fin, hora_inicio, hora_fin });
 
   const [result] = await pool.query(
     `INSERT INTO ofertas
       (titulo, descripcion, ubicacion, horario, fecha_inicio, fecha_fin, hora_inicio, hora_fin, horas_acreditar,
-       imagen_url, cupo_maximo, id_carrera, id_admin_creador)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+       es_ambiental, imagen_url, cupo_maximo, id_carrera, id_admin_creador)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [titulo, descripcion, ubicacion || null, horario || null,
      fecha_inicio || null, fecha_fin || null, hora_inicio || null, hora_fin || null,
-     horas_acreditar, imagen_url || null, cupo_maximo,
+     horas, ambiental, imagen_url || null, cupo_maximo,
      id_carrera || null, adminId]
   );
   return { id: result.insertId };
 }
 
 async function update(id, { titulo, descripcion, ubicacion, horario, fecha_inicio, fecha_fin, hora_inicio, hora_fin, horas_acreditar,
-                            imagen_url, cupo_maximo, id_carrera, activo }) {
-  validarOferta({ horas_acreditar, cupo_maximo });
+                            imagen_url, cupo_maximo, id_carrera, activo, es_ambiental }) {
+  const ambiental = toBoolean(es_ambiental);
+  const horas = ambiental ? HORAS_AMBIENTALES : horas_acreditar;
+  validarOferta({ horas_acreditar: horas, cupo_maximo });
   validarFechas({ fecha_inicio, fecha_fin, hora_inicio, hora_fin });
 
   await pool.query(
     `UPDATE ofertas SET
       titulo=?, descripcion=?, ubicacion=?, horario=?,
       fecha_inicio=?, fecha_fin=?, hora_inicio=?, hora_fin=?,
-      horas_acreditar=?, imagen_url=?, cupo_maximo=?,
+      horas_acreditar=?, es_ambiental=?, imagen_url=?, cupo_maximo=?,
       id_carrera=?, activo=?
      WHERE id_oferta=?`,
     [titulo, descripcion, ubicacion || null, horario || null,
      fecha_inicio || null, fecha_fin || null, hora_inicio || null, hora_fin || null,
-     horas_acreditar, imagen_url || null, cupo_maximo,
+     horas, ambiental, imagen_url || null, cupo_maximo,
      id_carrera || null, activo ?? true, id]
   );
 }

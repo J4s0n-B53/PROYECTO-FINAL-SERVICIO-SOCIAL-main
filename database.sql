@@ -63,6 +63,7 @@ CREATE TABLE ofertas (
     hora_inicio TIME NULL,
     hora_fin TIME NULL,
     horas_acreditar INT NOT NULL,
+    es_ambiental BOOLEAN DEFAULT FALSE,
     imagen_url VARCHAR(255),
     cupo_maximo INT NOT NULL,
     cupo_actual INT DEFAULT 0,
@@ -89,6 +90,17 @@ CREATE TABLE inscripciones (
     FOREIGN KEY (id_oferta)
         REFERENCES ofertas(id_oferta),
     UNIQUE(id_estudiante, id_oferta)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE horas_manuales_acreditadas (
+    id_hora_manual INT AUTO_INCREMENT PRIMARY KEY,
+    id_estudiante INT NOT NULL,
+    horas INT NOT NULL,
+    descripcion VARCHAR(150) DEFAULT 'Acreditacion manual',
+    fecha_acreditacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_estudiante)
+        REFERENCES usuarios(id_usuario)
+        ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =========================================
@@ -172,7 +184,12 @@ VALUES
 (42, 'Fátima María Calles Vásquez', 'cv24d07011@usonsonate.edu.sv', '5678', 'estudiante', 16, 0, NULL, 11, '2026-05-21 09:32:38'),
 (43, 'José Alejandro Quintanilla Guardado', 'qg22d01041@usonsonate.edu.sv', '5678', 'estudiante', 33, 0, NULL, 1, '2026-05-21 11:19:05'),
 (44, 'Fátima Alexandra Monterrosa Chachagua', 'mc25d01053@usonsonate.edu.sv', '5678', 'estudiante', 10, 0, NULL, 1, '2026-05-21 11:20:15'),
-(45, 'Marvin Josué Castaneda Lemus', 'cl22d01060@usonsonate.edu.sv', '5678', 'estudiante', 35, 0, NULL, 1, '2026-05-22 11:08:56');
+(45, 'Marvin Josué Castaneda Lemus', 'cl22d01060@usonsonate.edu.sv', '5678', 'estudiante', 35, 0, NULL, 1, '2026-05-22 11:08:56'),
+(46, 'Andrea Beatriz Morales Rivas', 'mr23i05021@usonsonate.edu.sv', '5678', 'estudiante', 34, 0, NULL, 8, '2026-05-27 12:00:00'),
+(47, 'Oscar Daniel Aguilar Perez', 'ap22i05017@usonsonate.edu.sv', '5678', 'estudiante', 38, 0, NULL, 8, '2026-05-27 12:00:00'),
+(48, 'Karla Vanessa Hernandez Lopez', 'hl23i05008@usonsonate.edu.sv', '5678', 'estudiante', 36, 0, NULL, 8, '2026-05-27 12:00:00'),
+(49, 'Luis Fernando Escobar Menjivar', 'em22i05014@usonsonate.edu.sv', '5678', 'estudiante', 32, 0, NULL, 8, '2026-05-27 12:00:00'),
+(50, 'Natalia Sofia Ramirez Guardado', 'rg23i05025@usonsonate.edu.sv', '5678', 'estudiante', 40, 0, NULL, 8, '2026-05-27 12:00:00');
 
 -- =========================================
 -- 5. OFERTAS
@@ -192,6 +209,12 @@ Se requiere pago de $2 para el transporte favor de cancelar en Contabilidad', 'C
 (6, 'Apoyo En Asesoria Legal', 'La Universidad de Sonsonaterequiere apoyo', 'Universidad de Sonsonate', NULL, '2026-05-25', '2026-05-29', '08:30:00', '15:45:00', 150, NULL, 5, 0, TRUE, 1, 1, '2026-05-22 11:05:00'),
 (7, 'Bla bla ble ble', 'sgffhdhgd', 'Universidad de Sonsonate', NULL, NULL, NULL, NULL, NULL, 150, NULL, 5, 1, FALSE, NULL, 1, '2026-05-22 11:37:39'),
 (8, 'hgjhkbkjk', 'kjbkjbjn,', 'jnmnmnm', NULL, '2026-09-23', '2026-09-26', '07:00:00', '12:00:00', 150, NULL, 5, 1, TRUE, NULL, 1, '2026-05-22 12:01:28');
+
+-- Oferta ambiental inicial: todas las actividades ambientales acreditan 25 horas.
+UPDATE ofertas
+SET es_ambiental = TRUE,
+    horas_acreditar = 25
+WHERE id_oferta = 4;
 
 -- =========================================
 -- 6. INSCRIPCIONES Y ESTADOS
@@ -221,7 +244,7 @@ VALUES
 
 ALTER TABLE facultades AUTO_INCREMENT = 5;
 ALTER TABLE carreras AUTO_INCREMENT = 12;
-ALTER TABLE usuarios AUTO_INCREMENT = 46;
+ALTER TABLE usuarios AUTO_INCREMENT = 51;
 ALTER TABLE ofertas AUTO_INCREMENT = 9;
 ALTER TABLE inscripciones AUTO_INCREMENT = 25;
 

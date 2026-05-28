@@ -8,6 +8,7 @@ import Inscripciones from './pages/Inscripciones';
 import Usuarios   from './pages/Usuarios';
 import MisInscripciones from './pages/MisInscripciones';
 import Perfil     from './pages/Perfil';
+import Acerca     from './pages/Acerca';
 
 function PrivateRoute({ children, adminOnly = false }) {
   const { user, loading } = useAuth();
@@ -35,10 +36,12 @@ export default function App() {
             <Route index element={<RootRedirect />} />
             <Route path="dashboard"     element={<PrivateRoute adminOnly><Dashboard /></PrivateRoute>} />
             <Route path="ofertas"       element={<Ofertas />} />
+            <Route path="historial-ofertas" element={<PrivateRoute adminOnly><Ofertas historial /></PrivateRoute>} />
             <Route path="inscripciones" element={<PrivateRoute adminOnly><Inscripciones /></PrivateRoute>} />
             <Route path="usuarios"      element={<PrivateRoute adminOnly><Usuarios /></PrivateRoute>} />
             <Route path="mis-inscripciones" element={<MisInscripciones />} />
             <Route path="perfil"        element={<Perfil />} />
+            <Route path="acerca"        element={<Acerca />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

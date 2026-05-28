@@ -3,7 +3,7 @@ import api from '../services/apiClient';
 import { PageHeader, StatCard, TableWrap, Th, Td, Badge, Spinner, useToast, Toast } from '../components/UI';
 
 /* Generador PDF global: constancia institucional */
-function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
+function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta, horasAmbientales = 0, metaAmbiental = 25, ambientalCumplido = false }) {
   const hoy    = new Date().toLocaleDateString('es-SV', { year: 'numeric', month: 'long', day: 'numeric' });
   const codigo = `USO-SS-GLOBAL-${e.id_usuario.toString().padStart(5, '0')}`;
   const logoUrl = `${window.location.origin}/logo-uso.png`;
@@ -18,7 +18,7 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
 
   const html = `<!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8"/>
-<title>Constancia Global de Servicio Social</title>
+<title>Constancia de Finalizacion de Servicio Social</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet"/>
 <style>
@@ -87,7 +87,7 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
   </div>
 
   <div class="body">
-    <p class="doc-title">CONSTANCIA GLOBAL DE SERVICIO SOCIAL</p>
+    <p class="doc-title">CONSTANCIA DE FINALIZACION DE SERVICIO SOCIAL</p>
     <p class="doc-sub">Documento oficial de culminaci&oacute;n &mdash; ${totalHoras} horas acreditadas</p>
 
     <div class="badge"><span>&#10003; Servicio Social Completado</span></div>
@@ -105,6 +105,7 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta }) {
       <tr><td>Correo institucional</td> <td>${e.correo_institucional}</td></tr>
       <tr><td>Carrera</td>              <td>${e.nombre_carrera || '&mdash;'}</td></tr>
       <tr><td>Facultad</td>             <td>${e.nombre_facultad || '&mdash;'}</td></tr>
+      <tr><td>Requisito ambiental</td>  <td><strong>${horasAmbientales} horas ${ambientalCumplido ? '&#10003;' : ''}</strong></td></tr>
       <tr><td>Total de horas</td>       <td><strong>${totalHoras} horas &#10003;</strong></td></tr>
       <tr><td>Actividades</td>          <td>${actividades.length} completadas</td></tr>
     </table>
@@ -192,8 +193,9 @@ export default function Dashboard() {
       correo: u.correo_institucional,
       carrera: u.nombre_carrera || '',
       horas: Number(u.horas_acumuladas ?? 0),
+      ambiental: Boolean(u.ambiental_cumplido) || Number(u.horas_ambientales ?? 0) >= 25,
     }))
-    .filter(u => u.horas >= 500);
+    .filter(u => u.horas >= 500 && u.ambiental);
   const estudiantesCompletosFiltrados = estudiantesCompletos.filter(est => {
     const texto = `${est.nombre} ${est.correo}`.toLowerCase();
     const coincideBusqueda = !queryCompletos || texto.includes(queryCompletos.trim().toLowerCase());

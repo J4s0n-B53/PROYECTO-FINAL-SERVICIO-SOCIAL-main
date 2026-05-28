@@ -9,7 +9,7 @@ import {
 const EMPTY_FORM = {
   titulo:'', descripcion:'', ubicacion:'', horario:'',
   fecha_inicio:'', fecha_fin:'', hora_inicio:'', hora_fin:'',
-  horas_acreditar:150, cupo_maximo:5, id_carrera:'', imagen_url:'', activo:true
+  horas_acreditar:150, cupo_maximo:5, id_carrera:'', imagen_url:'', activo:true, es_ambiental:false
 };
 const MIN_MATERIAS_APROBADAS = 30;
 const META_HORAS = 500;
@@ -27,7 +27,7 @@ function formatDate(value) {
 }
 
 function dateToInput(value) {
-  return formatDate(value);
+  return value ? String(value).slice(0, 10) : '';
 }
 
 function inputToDate(value) {
@@ -93,6 +93,8 @@ function generarPDFOferta({ oferta, participantes }) {
   .body{padding:30px 38px 28px}
   .doc-title{font-family:'Playfair Display',serif;color:#1a3a6b;font-size:20px;font-weight:600;text-align:center;letter-spacing:1px;margin:0 0 6px}
   .doc-sub{text-align:center;color:#555;font-size:13px;margin:0 0 22px}
+  .badge{display:flex;justify-content:center;margin-bottom:24px}
+  .badge span{background:#2c6e2f;color:#fff;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:6px 20px;border-radius:100px}
   .body-text{color:#222;font-size:14px;line-height:1.7;text-align:justify;margin-bottom:22px}
   .body-text strong{color:#1a3a6b}
   .info-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-bottom:24px}
@@ -144,6 +146,7 @@ function generarPDFOferta({ oferta, participantes }) {
   <div class="body">
     <p class="doc-title">CONSTANCIA DE ACTIVIDAD DE SERVICIO SOCIAL</p>
     <p class="doc-sub">Reporte de participantes y horas asignadas</p>
+    <div class="badge"><span>&#10003; Actividad completada</span></div>
     <p class="body-text">
       La <strong>Universidad de Sonsonate</strong>, a trav&eacute;s del Sistema de Servicio Social,
       hace constar la informaci&oacute;n registrada para la actividad
@@ -192,6 +195,10 @@ function inputToTime(value) {
   const trimmed = String(value || '').trim();
   if (!trimmed) return '';
   return /^\d{2}:\d{2}$/.test(trimmed) ? trimmed : null;
+}
+
+function toBoolean(value) {
+  return value === true || value === 1 || value === '1' || value === 'true';
 }
 
 function TimeSelect({ value, onChange }) {
@@ -310,7 +317,7 @@ function ImageDropField({ value, file, onFile, onUrlChange }) {
   );
 }
 
-export default function Ofertas() {
+export default function Ofertas({ historial = false }) {
   const { user } = useAuth();
   const isAdmin  = user?.rol === 'admin';
 
@@ -321,9 +328,11 @@ export default function Ofertas() {
   const [loading,   setLoading]   = useState(true);
   const [query,     setQuery]     = useState('');
   const [carreraFiltro, setCarreraFiltro] = useState('');
+  const [fechaCreacionFiltro, setFechaCreacionFiltro] = useState('');
   const [modal,     setModal]     = useState(false);
   const [detModal,  setDetModal]  = useState(null);
   const [adminDetModal, setAdminDetModal] = useState(null);
+  const [confirmToggle, setConfirmToggle] = useState(null);
   const [confirmDesuscripcion, setConfirmDesuscripcion] = useState(null);
   const [form,      setForm]      = useState(EMPTY_FORM);
   const [imageFile, setImageFile] = useState(null);
@@ -360,7 +369,7 @@ export default function Ofertas() {
       hora_inicio: timeToInput(o.hora_inicio),
       hora_fin: timeToInput(o.hora_fin),
       cupo_maximo: o.cupo_maximo, id_carrera: o.id_carrera||'',
-      imagen_url: o.imagen_url||'', activo: o.activo
+      imagen_url: o.imagen_url||'', activo: o.activo, es_ambiental: toBoolean(o.es_ambiental)
     });
     setImageFile(null);
     setEditId(o.id_oferta);
@@ -414,7 +423,7 @@ export default function Ofertas() {
         imagenUrl = uploaded.data.imagen_url;
       }
 
-      const body = { ...form, imagen_url: imagenUrl, fecha_inicio: fechaInicio, fecha_fin: fechaFin, hora_inicio: horaInicio || '', hora_fin: horaFin || '', id_carrera: form.id_carrera || null };
+      const body = { ...form, horas_acreditar: form.es_ambiental ? 25 : form.horas_acreditar, imagen_url: imagenUrl, fecha_inicio: fechaInicio, fecha_fin: fechaFin, hora_inicio: horaInicio || '', hora_fin: horaFin || '', id_carrera: form.id_carrera || null };
       if (editId) await api.put(`/ofertas/${editId}`, body);
       else        await api.post('/ofertas', body);
       show(editId ? 'Oferta actualizada' : 'Oferta creada');
@@ -425,7 +434,12 @@ export default function Ofertas() {
   }
 
   async function toggleOferta(id) {
-    try { await api.patch(`/ofertas/${id}/toggle`); show('Estado actualizado'); load(); }
+    try {
+      await api.patch(`/ofertas/${id}/toggle`);
+      show(historial ? 'Oferta activada' : 'Oferta enviada al historial');
+      setConfirmToggle(null);
+      load();
+    }
     catch { show('Error','error'); }
   }
 
@@ -510,12 +524,17 @@ export default function Ofertas() {
 
   const filtered = ofertas.filter(o => {
     const coincideQuery   = !query || o.titulo.toLowerCase().includes(query.toLowerCase());
+    const coincideEstado = !isAdmin || Boolean(o.activo) !== historial;
+    const coincideFechaCreacion =
+      !historial ||
+      !fechaCreacionFiltro ||
+      String(o.created_at || '').slice(0, 10) === fechaCreacionFiltro;
     const coincideFiltroCarrera =
       !carreraFiltro ||
       (carreraFiltro === 'general' && !o.id_carrera) ||
       String(o.id_carrera || '') === carreraFiltro;
     const coincideCarrera = isAdmin || !o.id_carrera || o.id_carrera === user?.id_carrera;
-    return coincideQuery && coincideFiltroCarrera && coincideCarrera;
+    return coincideQuery && coincideEstado && coincideFechaCreacion && coincideFiltroCarrera && coincideCarrera;
   });
 
   if (loading) return <Spinner />;
@@ -523,12 +542,12 @@ export default function Ofertas() {
   return (
     <>
       <PageHeader
-        title={isAdmin ? 'Gestión de ofertas' : 'Ofertas disponibles'}
-        subtitle={isAdmin ? 'Crea, edita y administra las plazas disponibles' : 'Plazas abiertas para ti'}
+        title={isAdmin && historial ? 'Historial de ofertas' : isAdmin ? 'Gestión de ofertas' : 'Ofertas disponibles'}
+        subtitle={isAdmin && historial ? 'Consulta actividades desactivadas y reactívalas cuando sea necesario' : isAdmin ? 'Crea, edita y administra las plazas disponibles' : 'Plazas abiertas para ti'}
       />
 
       {isAdmin && (
-        <div style={{ display:'flex', gap:10, marginBottom:20, flexWrap:'wrap' }}>
+        <div style={{ display:'flex', gap:10, marginBottom:20, flexWrap:'wrap', alignItems:'center' }}>
           <div style={{ position:'relative', flex:1 }}>
             <span style={{
               position:'absolute',
@@ -561,16 +580,37 @@ export default function Ofertas() {
             }}
           >
             <option value="">Todas las carreras</option>
+            <option value="general">Oferta para todas las carreras</option>
             {carreras.map(c => <option key={c.id_carrera} value={c.id_carrera}>{c.nombre_carrera}</option>)}
           </select>
-          <Btn variant="accent" onClick={openNew}>+ Nueva oferta</Btn>
+          {historial && (
+            <input
+              type="date"
+              value={fechaCreacionFiltro}
+              onChange={e => setFechaCreacionFiltro(e.target.value)}
+              title="Filtrar por fecha de creación"
+              style={{
+                background:'#fff',
+                border:'1px solid rgba(10,27,78,.15)',
+                borderRadius:8,
+                padding:'9px 12px',
+                fontFamily:'inherit',
+                fontSize:13,
+                color:'#8d97b8',
+                outline:'none',
+                boxShadow:'0 1px 3px rgba(10,27,78,.06)',
+                minWidth:180
+              }}
+            />
+          )}
+          {!historial && <Btn variant="accent" onClick={openNew}>+ Nueva oferta</Btn>}
         </div>
       )}
 
       {/* ADMIN CARDS */}
       {isAdmin && (
         filtered.length === 0
-          ? <EmptyState msg="Sin ofertas registradas." />
+          ? <EmptyState msg={historial ? 'No hay ofertas en el historial.' : 'Sin ofertas activas registradas.'} />
           : <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:18 }}>
               {filtered.map(o => (
                 <AdminOfertaCard
@@ -578,7 +618,7 @@ export default function Ofertas() {
                   o={o}
                   onOpen={() => openAdminDetalle(o)}
                   onEdit={() => openEdit(o)}
-                  onToggle={() => toggleOferta(o.id_oferta)}
+                  onToggle={() => o.activo ? setConfirmToggle(o) : toggleOferta(o.id_oferta)}
                 />
               ))}
             </div>
@@ -591,12 +631,14 @@ export default function Ofertas() {
           : <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:18 }}>
               {filtered.map(o => {
                 const inscripcion = inscripciones.find(i => i.id_oferta === o.id_oferta);
+                const ambientalRegistrada = inscripciones.some(i => i.es_ambiental && i.estado !== 'rechazado');
                 return (
                   <OfertaCard
                     key={o.id_oferta}
                     o={o}
                     user={perfil || user}
                     inscripcion={inscripcion}
+                    ambientalRegistrada={ambientalRegistrada}
                     onDesuscribir={() => setConfirmDesuscripcion({
                       id: inscripcion.id_inscripcion,
                       titulo: o.titulo
@@ -622,8 +664,8 @@ export default function Ofertas() {
           <Field label="Ubicación"><Input value={form.ubicacion} onChange={e=>setForm({...form,ubicacion:e.target.value})} placeholder="Campus Central" /></Field>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-          <Field label="Fecha de inicio"><Input value={form.fecha_inicio} onChange={e=>setForm({...form,fecha_inicio:e.target.value})} placeholder="dd/mm/aaaa" /></Field>
-          <Field label="Fecha de finalización"><Input value={form.fecha_fin} onChange={e=>setForm({...form,fecha_fin:e.target.value})} placeholder="dd/mm/aaaa" /></Field>
+          <Field label="Fecha de inicio"><Input type="date" value={form.fecha_inicio} onChange={e=>setForm({...form,fecha_inicio:e.target.value})} /></Field>
+          <Field label="Fecha de finalización"><Input type="date" value={form.fecha_fin} onChange={e=>setForm({...form,fecha_fin:e.target.value})} /></Field>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
           <Field label="Hora de inicio">
@@ -634,9 +676,25 @@ export default function Ofertas() {
           </Field>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-          <Field label="Horas a acreditar"><Input type="number" value={form.horas_acreditar} onChange={e=>setForm({...form,horas_acreditar:+e.target.value})} min={1} max={500} /></Field>
+          <Field label="Horas a acreditar"><Input type="number" value={form.es_ambiental ? 25 : form.horas_acreditar} disabled={form.es_ambiental} onChange={e=>setForm({...form,horas_acreditar:+e.target.value})} min={1} max={500} /></Field>
           <Field label="Cupo máximo"><Input type="number" value={form.cupo_maximo} onChange={e=>setForm({...form,cupo_maximo:+e.target.value})} min={1} /></Field>
         </div>
+        <label style={{
+          display:'flex',
+          alignItems:'center',
+          gap:10,
+          margin:'2px 0 14px',
+          fontSize:13,
+          color:'var(--text2)',
+          cursor:'pointer'
+        }}>
+          <input
+            type="checkbox"
+            checked={form.es_ambiental}
+            onChange={e=>setForm({...form, es_ambiental:e.target.checked, horas_acreditar:e.target.checked ? 25 : form.horas_acreditar})}
+          />
+          Actividad ambiental (25 horas obligatorias)
+        </label>
         <Field label="Carrera (opcional)">
           <Select value={form.id_carrera} onChange={e=>setForm({...form,id_carrera:e.target.value})}>
             <option value="">Todas las carreras</option>
@@ -666,7 +724,13 @@ export default function Ofertas() {
 
       {/* MODAL DETALLE (estudiante) */}
       {detModal && (
-        <DetalleModal o={detModal} user={perfil || user} onClose={() => setDetModal(null)} onInscribir={inscribirse} />
+        <DetalleModal
+          o={detModal}
+          user={perfil || user}
+          ambientalRegistrada={inscripciones.some(i => i.es_ambiental && i.estado !== 'rechazado')}
+          onClose={() => setDetModal(null)}
+          onInscribir={inscribirse}
+        />
       )}
 
       {confirmDesuscripcion && (
@@ -695,6 +759,38 @@ export default function Ofertas() {
           </div>
           <div style={{ marginTop: 10, fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
             {confirmDesuscripcion.titulo}
+          </div>
+        </Modal>
+      )}
+
+      {confirmToggle && (
+        <Modal
+          open
+          title="Desactivar oferta"
+          onClose={() => setConfirmToggle(null)}
+          width={430}
+          footer={
+            <>
+              <Btn variant="outline" onClick={() => setConfirmToggle(null)}>Cancelar</Btn>
+              <Btn
+                variant="danger"
+                onClick={() => toggleOferta(confirmToggle.id_oferta)}
+                style={{
+                  background: 'rgba(217,48,37,.08)',
+                  color: '#b52920',
+                  border: '1px solid rgba(217,48,37,.30)'
+                }}
+              >
+                Aceptar
+              </Btn>
+            </>
+          }
+        >
+          <div style={{ fontSize:14, color:'var(--text2)', lineHeight:1.6 }}>
+            ¿Estás seguro de desactivar esta oferta? Se moverá al historial y los estudiantes ya no la verán en ofertas disponibles.
+          </div>
+          <div style={{ marginTop:10, fontSize:13, fontWeight:700, color:'var(--text)' }}>
+            {confirmToggle.titulo}
           </div>
         </Modal>
       )}
@@ -733,7 +829,17 @@ function AdminOfertaCard({ o, onOpen, onEdit, onToggle }) {
       <div style={{ padding:16, display:'flex', flexDirection:'column', flex:1 }}>
         <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:10, marginBottom:8 }}>
           <div style={{ fontSize:16, fontWeight:700, lineHeight:1.35, color:'var(--text)' }}>{o.titulo}</div>
-          <Badge type={o.activo ? 'active' : 'inactive'}>{o.activo ? 'Activo' : 'Inactivo'}</Badge>
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:6, flexShrink:0 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+              {o.es_ambiental ? <span title="Servicio ambiental" style={{ color:'var(--green)', fontSize:16, lineHeight:1 }}>🌱</span> : null}
+              <Badge type={o.activo ? 'active' : 'inactive'}>{o.activo ? 'Activo' : 'Inactivo'}</Badge>
+            </div>
+            {o.created_at && (
+              <span style={{ fontSize:11, color:'var(--text3)', whiteSpace:'nowrap' }}>
+                Creada: {formatDate(o.created_at)}
+              </span>
+            )}
+          </div>
         </div>
 
         <div style={{
@@ -751,10 +857,10 @@ function AdminOfertaCard({ o, onOpen, onEdit, onToggle }) {
 
         <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginBottom:14 }}>
           <Tag color="blue">{o.horas_acreditar}h</Tag>
-          {o.horario && <Tag color="gray">{o.horario}</Tag>}
           {(o.fecha_inicio || o.fecha_fin) && <Tag color="gray">{formatDate(o.fecha_inicio) || 'Inicio'} - {formatDate(o.fecha_fin) || 'Fin'}</Tag>}
           {(o.hora_inicio || o.hora_fin) && <Tag color="gray">{formatTime(o.hora_inicio) || '--:--'} - {formatTime(o.hora_fin) || '--:--'}</Tag>}
           {o.ubicacion && <Tag color="gray">{o.ubicacion}</Tag>}
+          {o.es_ambiental ? <Tag color="green">Ambiental</Tag> : null}
           {o.nombre_carrera ? <Tag color="green">{o.nombre_carrera}</Tag> : <Tag color="amber">Todas las carreras</Tag>}
         </div>
 
@@ -790,6 +896,8 @@ function AdminOfertaCard({ o, onOpen, onEdit, onToggle }) {
 function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onCambiarEstado, onEliminar }) {
   const [query, setQuery] = useState('');
   const [confirmEliminar, setConfirmEliminar] = useState(null);
+  const [confirmMasiva, setConfirmMasiva] = useState(false);
+  const [savingMasiva, setSavingMasiva] = useState(false);
   const inscritosKey = inscritos
     .map(i => `${i.id_inscripcion}:${i.horas_acreditadas ?? ''}:${i.horas_acreditar ?? ''}`)
     .join('|');
@@ -822,9 +930,25 @@ function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onCambiarEsta
       ...i,
       horas_asignadas: horasPorInscripcion[i.id_inscripcion] ?? i.horas_acreditadas ?? i.horas_acreditar ?? o.horas_acreditar
     }));
+  const candidatosMasiva = inscritos.filter(i =>
+    i.estado === 'aceptado' &&
+    i.horas_acreditadas === null
+  );
 
   function descargarConstanciaOferta() {
     generarPDFOferta({ oferta: o, participantes: participantesReporte });
+  }
+
+  async function acreditarMasivamente() {
+    setSavingMasiva(true);
+    try {
+      for (const inscrito of candidatosMasiva) {
+        await onAcreditar(inscrito.id_inscripcion, o.horas_acreditar);
+      }
+      setConfirmMasiva(false);
+    } finally {
+      setSavingMasiva(false);
+    }
   }
 
   return (
@@ -836,15 +960,25 @@ function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onCambiarEsta
           <div style={{ fontSize:13, color:'var(--text2)' }}>
             {inscritos.length}/{o.cupo_maximo} estudiantes inscritos
           </div>
-          <Btn
-            variant="accent"
-            onClick={descargarConstanciaOferta}
-            disabled={participantesReporte.length === 0}
-            style={{ whiteSpace:'nowrap' }}
-          >
-            <span aria-hidden="true">{'\uD83D\uDCC4'}</span>
-            Constancia de actividad
-          </Btn>
+          <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap', justifyContent:'flex-end' }}>
+            <Btn
+              variant="green"
+              onClick={() => setConfirmMasiva(true)}
+              disabled={candidatosMasiva.length === 0}
+              style={{ whiteSpace:'nowrap' }}
+            >
+              Acreditación Masiva
+            </Btn>
+            <Btn
+              variant="accent"
+              onClick={descargarConstanciaOferta}
+              disabled={participantesReporte.length === 0}
+              style={{ whiteSpace:'nowrap' }}
+            >
+              <span aria-hidden="true">{'\uD83D\uDCC4'}</span>
+              Constancia de actividad
+            </Btn>
+          </div>
         </div>
 
         <div style={{ position:'relative', marginBottom:14 }}>
@@ -885,6 +1019,7 @@ function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onCambiarEsta
             const horasAcreditadas = i.estado === 'finalizado' || i.horas_acreditadas !== null && i.horas_acreditadas !== undefined;
             const estaPendiente = i.estado === 'pendiente';
             const estaAceptado = i.estado === 'aceptado';
+            const esAmbiental = Boolean(o.es_ambiental);
             return (
             <div key={i.id_inscripcion} style={{
               border:'1px solid rgba(10,27,78,.10)',
@@ -946,25 +1081,25 @@ function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onCambiarEsta
                         type="number"
                         min="0"
                         max={i.horas_oferta || o.horas_acreditar}
-                        value={horasPorInscripcion[i.id_inscripcion] ?? ''}
-                        disabled={!estaAceptado}
+                        value={esAmbiental ? o.horas_acreditar : horasPorInscripcion[i.id_inscripcion] ?? ''}
+                        disabled={!estaAceptado || esAmbiental}
                         onChange={e => setHoras(i.id_inscripcion, e.target.value)}
-                        title="Horas a acreditar"
+                        title={esAmbiental ? 'Las actividades ambientales acreditan 25 horas' : 'Horas a acreditar'}
                         style={{
                           width:70,
-                          background: estaAceptado ? '#fff' : 'rgba(10,27,78,.04)',
+                          background: estaAceptado && !esAmbiental ? '#fff' : 'rgba(10,27,78,.04)',
                           border:'1px solid var(--border2)',
                           borderRadius:6,
                           padding:'6px 8px',
                           fontFamily:'inherit',
                           fontSize:12,
-                          color: estaAceptado ? 'var(--text)' : 'var(--text3)',
-                          cursor: estaAceptado ? 'text' : 'not-allowed'
+                          color: estaAceptado && !esAmbiental ? 'var(--text)' : 'var(--text3)',
+                          cursor: estaAceptado && !esAmbiental ? 'text' : 'not-allowed'
                         }}
                       />
                       <Btn
                         variant="green"
-                        onClick={() => onAcreditar(i.id_inscripcion, horasPorInscripcion[i.id_inscripcion])}
+                        onClick={() => onAcreditar(i.id_inscripcion, esAmbiental ? o.horas_acreditar : horasPorInscripcion[i.id_inscripcion])}
                         disabled={!estaAceptado}
                         style={{ padding:'6px 10px' }}
                       >
@@ -1039,23 +1174,49 @@ function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onCambiarEsta
           </p>
         </Modal>
       )}
+
+      {confirmMasiva && (
+        <Modal
+          open
+          title="Acreditación masiva"
+          onClose={() => !savingMasiva && setConfirmMasiva(false)}
+          width={460}
+          footer={
+            <>
+              <Btn variant="outline" onClick={() => setConfirmMasiva(false)} disabled={savingMasiva}>Cancelar</Btn>
+              <Btn variant="green" onClick={acreditarMasivamente} disabled={savingMasiva}>
+                {savingMasiva ? 'Acreditando...' : 'Aceptar'}
+              </Btn>
+            </>
+          }
+        >
+          <p style={{ fontSize:13, color:'var(--text2)', lineHeight:1.6, margin:0 }}>
+            Se acreditarán <strong style={{ color:'var(--text)' }}>{o.horas_acreditar} horas</strong> a{' '}
+            <strong style={{ color:'var(--text)' }}>{candidatosMasiva.length}</strong>{' '}
+            estudiante{candidatosMasiva.length !== 1 ? 's' : ''} aceptado{candidatosMasiva.length !== 1 ? 's' : ''} sin horas acreditadas.
+            Los estudiantes finalizados no se modificarán.
+          </p>
+        </Modal>
+      )}
     </>
   );
 }
 
-function OfertaCard({ o, user, inscripcion, onVer, onDesuscribir }) {
+function OfertaCard({ o, user, inscripcion, ambientalRegistrada, onVer, onDesuscribir }) {
   const pct = o.cupo_maximo > 0 ? Math.round((o.cupo_actual/o.cupo_maximo)*100) : 0;
   const barColor = pct > 80 ? 'var(--red)' : pct > 50 ? 'var(--amber)' : 'var(--green)';
   const isMyCarrera = o.id_carrera && o.id_carrera === user?.id_carrera;
   const tieneAcceso = (user?.materias ?? user?.materias_aprobadas ?? 0) >= MIN_MATERIAS_APROBADAS;
   const horasCompletadas = Number(user?.horas_acumuladas ?? 0) >= META_HORAS;
+  const ambientalCumplido = Boolean(user?.ambiental_cumplido) || Number(user?.horas_ambientales ?? 0) >= 25;
   const estaInscrito = Boolean(inscripcion);
   const estaPendiente = inscripcion?.estado === 'pendiente';
   const estaAceptado = inscripcion?.estado === 'aceptado';
   const estaFinalizado = inscripcion?.estado === 'finalizado';
   const estaRechazado = inscripcion?.estado === 'rechazado';
   const cupoLleno = o.cupo_actual >= o.cupo_maximo;
-  const bloqueado = estaInscrito || cupoLleno || !tieneAcceso || horasCompletadas;
+  const ambientalBloqueado = Boolean(o.es_ambiental) && (ambientalCumplido || ambientalRegistrada) && !estaInscrito;
+  const bloqueado = estaInscrito || cupoLleno || !tieneAcceso || horasCompletadas || ambientalBloqueado;
   const textoBoton = estaPendiente
     ? 'Pendiente'
     : estaAceptado
@@ -1066,11 +1227,13 @@ function OfertaCard({ o, user, inscripcion, onVer, onDesuscribir }) {
           ? 'Rechazado'
           : horasCompletadas
             ? 'Horas completadas'
-            : !tieneAcceso
-              ? 'Sin acceso'
-              : cupoLleno
-                ? 'Cupo máximo alcanzado'
-                : 'Inscribirme';
+            : ambientalBloqueado
+              ? (ambientalCumplido ? 'Ambiental cumplido' : 'Ambiental registrado')
+              : !tieneAcceso
+                ? 'Sin acceso'
+                : cupoLleno
+                  ? 'Cupo máximo alcanzado'
+                  : 'Inscribirme';
   const estadoButtonStyle = estaPendiente
     ? {
         background: 'rgba(212,143,10,.12)',
@@ -1114,17 +1277,25 @@ function OfertaCard({ o, user, inscripcion, onVer, onDesuscribir }) {
         : <div style={{ width:'100%', height:140, background:'linear-gradient(135deg,#e8eaf2 0%,#d0d5ea 100%)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:32 }}>SS</div>
       }
       <div style={{ padding:16, display:'flex', flexDirection:'column', flex:1 }}>
-        <div style={{ fontSize:14, fontWeight:600, marginBottom:6, lineHeight:1.4, color:'var(--text)' }}>{o.titulo}</div>
+        <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:10, marginBottom:6 }}>
+          <div style={{ fontSize:14, fontWeight:600, lineHeight:1.4, color:'var(--text)' }}>{o.titulo}</div>
+          {o.created_at && (
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'flex-end', gap:5, flexShrink:0, fontSize:11, color:'var(--text3)', whiteSpace:'nowrap' }}>
+              {o.es_ambiental ? <span title="Servicio ambiental" style={{ color:'var(--green)', fontSize:15, lineHeight:1 }}>🌱</span> : null}
+              <span>Creada: {formatDate(o.created_at)}</span>
+            </div>
+          )}
+        </div>
         <div style={{ fontSize:12, color:'var(--text2)', lineHeight:1.6, marginBottom:12,
           display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
           {o.descripcion}
         </div>
         <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginBottom:14 }}>
           <Tag color="blue">{o.horas_acreditar}h</Tag>
-          {o.horario  && <Tag color="gray">{o.horario}</Tag>}
           {(o.fecha_inicio || o.fecha_fin) && <Tag color="gray">{formatDate(o.fecha_inicio) || 'Inicio'} - {formatDate(o.fecha_fin) || 'Fin'}</Tag>}
           {(o.hora_inicio || o.hora_fin) && <Tag color="gray">{formatTime(o.hora_inicio) || '--:--'} - {formatTime(o.hora_fin) || '--:--'}</Tag>}
           {o.ubicacion && <Tag color="gray">{o.ubicacion}</Tag>}
+          {o.es_ambiental ? <Tag color="green">Ambiental</Tag> : null}
           {isMyCarrera && <Tag color="green">{o.nombre_carrera || 'Carrera asignada'}</Tag>}
           {!o.id_carrera && <Tag color="amber">Todas las carreras</Tag>}
         </div>
@@ -1136,11 +1307,11 @@ function OfertaCard({ o, user, inscripcion, onVer, onDesuscribir }) {
           <div style={{ display:'grid', gridTemplateColumns: estaPendiente ? '1fr 1fr' : '1fr', gap:8 }}>
             <button disabled={bloqueado} onClick={e=>{e.stopPropagation(); if (!bloqueado) onVer();}} style={{
             width:'100%', minHeight:42,
-            background: estadoButtonStyle?.background || (cupoLleno ? 'rgba(217,48,37,.08)' : (!tieneAcceso || horasCompletadas) ? 'rgba(10,27,78,.06)' : 'none'),
-            border: estadoButtonStyle?.border || (cupoLleno ? '1px solid rgba(217,48,37,.22)' : (!tieneAcceso || horasCompletadas) ? '1px solid rgba(10,27,78,.12)' : '1px solid rgba(10,27,78,.20)'),
+            background: estadoButtonStyle?.background || (cupoLleno ? 'rgba(217,48,37,.08)' : (!tieneAcceso || horasCompletadas || ambientalBloqueado) ? 'rgba(10,27,78,.06)' : 'none'),
+            border: estadoButtonStyle?.border || (cupoLleno ? '1px solid rgba(217,48,37,.22)' : (!tieneAcceso || horasCompletadas || ambientalBloqueado) ? '1px solid rgba(10,27,78,.12)' : '1px solid rgba(10,27,78,.20)'),
             borderRadius:7, padding:'9px', fontFamily:'inherit', fontSize:13,
             fontWeight:600,
-            color: estadoButtonStyle?.color || (cupoLleno ? '#b52920' : (!tieneAcceso || horasCompletadas) ? 'var(--text3)' : '#0A1B4E'),
+            color: estadoButtonStyle?.color || (cupoLleno ? '#b52920' : (!tieneAcceso || horasCompletadas || ambientalBloqueado) ? 'var(--text3)' : '#0A1B4E'),
             cursor: bloqueado ? 'not-allowed' : 'pointer',
             opacity: bloqueado ? .85 : 1,
             transition:'.15s'
@@ -1175,18 +1346,21 @@ function OfertaCard({ o, user, inscripcion, onVer, onDesuscribir }) {
   );
 }
 
-function DetalleModal({ o, user, onClose, onInscribir }) {
+function DetalleModal({ o, user, ambientalRegistrada, onClose, onInscribir }) {
   const pct = o.cupo_maximo > 0 ? Math.round((o.cupo_actual/o.cupo_maximo)*100) : 0;
   const isFull = o.cupo_actual >= o.cupo_maximo;
   const tieneAcceso = (user?.materias ?? user?.materias_aprobadas ?? 0) >= MIN_MATERIAS_APROBADAS;
   const horasCompletadas = Number(user?.horas_acumuladas ?? 0) >= META_HORAS;
+  const ambientalCumplido = Boolean(user?.ambiental_cumplido) || Number(user?.horas_ambientales ?? 0) >= 25;
+  const ambientalBloqueado = Boolean(o.es_ambiental) && (ambientalCumplido || ambientalRegistrada);
 
   return (
     <Modal open title={o.titulo} onClose={onClose}
       footer={<>
         <Btn variant="outline" onClick={onClose}>Cerrar</Btn>
-        {!isFull && tieneAcceso && !horasCompletadas && <Btn variant="accent" onClick={() => onInscribir(o.id_oferta)}>Inscribirme</Btn>}
+        {!isFull && tieneAcceso && !horasCompletadas && !ambientalBloqueado && <Btn variant="accent" onClick={() => onInscribir(o.id_oferta)}>Inscribirme</Btn>}
         {!isFull && horasCompletadas && <Btn variant="outline" disabled>Horas completadas</Btn>}
+        {!isFull && !horasCompletadas && ambientalBloqueado && <Btn variant="outline" disabled>{ambientalCumplido ? 'Ambiental cumplido' : 'Ambiental registrado'}</Btn>}
         {!isFull && !horasCompletadas && !tieneAcceso && <Btn variant="outline" disabled>Sin acceso</Btn>}
         {isFull  && <Btn variant="outline" disabled>Cupo máximo alcanzado</Btn>}
       </>}
@@ -1196,12 +1370,12 @@ function DetalleModal({ o, user, onClose, onInscribir }) {
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:16 }}>
         {[
           ['Ubicación', o.ubicacion||'-'],
-          ['Horario', o.horario||'-'],
           ['Fecha de inicio', formatDate(o.fecha_inicio)||'-'],
           ['Fecha de finalización', formatDate(o.fecha_fin)||'-'],
           ['Hora de inicio', formatTime(o.hora_inicio)||'-'],
           ['Hora de finalización', formatTime(o.hora_fin)||'-'],
           ['Horas', o.horas_acreditar+'h'],
+          ['Tipo', o.es_ambiental ? 'Ambiental' : 'Servicio social'],
           ['Carrera', o.nombre_carrera||'Todas']
         ].map(([l,v]) => (
           <div key={l}>

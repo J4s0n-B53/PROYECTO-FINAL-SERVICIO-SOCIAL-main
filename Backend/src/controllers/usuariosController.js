@@ -20,8 +20,8 @@ async function getMe(req, res) {
 
 async function actualizarHorasManuales(req, res) {
   try {
-    await usuariosService.actualizarHorasManuales(req.params.id, req.body.horas_manuales);
-    res.json({ ok: true });
+    const resultado = await usuariosService.actualizarHorasManuales(req.params.id, req.body.horas_manuales);
+    res.json({ ok: true, ...resultado });
   } catch (err) {
     res.status(err.status || 500).json({ error: err.message || 'Error del servidor' });
   }

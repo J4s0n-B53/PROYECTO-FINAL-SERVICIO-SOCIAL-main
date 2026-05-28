@@ -4,15 +4,21 @@ import { PageHeader, TableWrap, Th, Td, Badge, Spinner, useToast, Toast } from '
 
 export default function Inscripciones() {
   const [inscripciones, setInscripciones] = useState([]);
+  const [carreras, setCarreras] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
+  const [carrera, setCarrera] = useState('');
   const [estado, setEstado] = useState('');
   const { toast, show } = useToast();
 
   async function load() {
     try {
-      const { data } = await api.get('/inscripciones');
-      setInscripciones(data);
+      const [inscripcionesRes, carrerasRes] = await Promise.all([
+        api.get('/inscripciones'),
+        api.get('/carreras')
+      ]);
+      setInscripciones(inscripcionesRes.data);
+      setCarreras(carrerasRes.data);
     } catch {
       show('Error al cargar', 'error');
     } finally {
@@ -23,10 +29,11 @@ export default function Inscripciones() {
   useEffect(() => { load(); }, []);
 
   const filtered = inscripciones.filter(i => {
-    const texto = `${i.estudiante_nombre || ''} ${i.correo_institucional || ''} ${i.oferta_titulo || ''}`.toLowerCase();
+    const texto = `${i.estudiante_nombre || ''} ${i.correo_institucional || ''} ${i.oferta_titulo || ''} ${i.nombre_carrera || ''}`.toLowerCase();
     const matchQ = !query || texto.includes(query.trim().toLowerCase());
+    const matchC = !carrera || i.nombre_carrera === carrera;
     const matchE = !estado || i.estado === estado;
-    return matchQ && matchE;
+    return matchQ && matchC && matchE;
   });
 
   if (loading) return <Spinner />;
@@ -62,6 +69,25 @@ export default function Inscripciones() {
             }}
           />
         </div>
+
+        <select
+          value={carrera}
+          onChange={e => setCarrera(e.target.value)}
+          style={{
+            background: 'var(--bg2)',
+            border: '1px solid var(--border)',
+            borderRadius: 8,
+            padding: '9px 14px',
+            fontFamily: 'inherit',
+            fontSize: 13,
+            color: '#8d97b8',
+            outline: 'none',
+            minWidth: 220
+          }}
+        >
+          <option value="">Todas las carreras</option>
+          {carreras.map(c => <option key={c.id_carrera} value={c.nombre_carrera}>{c.nombre_carrera}</option>)}
+        </select>
 
         <select
           value={estado}

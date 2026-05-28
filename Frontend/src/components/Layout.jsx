@@ -4,13 +4,16 @@ import { useAuth } from '../context/AuthContext';
 const ADMIN_MENU = [
   { to: '/dashboard',     label: 'Dashboard',     icon: '📊' },
   { to: '/ofertas',       label: 'Ofertas',       icon: '💼' },
+  { to: '/historial-ofertas', label: 'Historial de ofertas', icon: '🗂️' },
   { to: '/inscripciones', label: 'Inscripciones', icon: '📋' },
   { to: '/usuarios',      label: 'Usuarios',      icon: '👥' },
+  { to: '/acerca',        label: 'Sobre nosotros', icon: 'ℹ️' },
 ];
 const STUDENT_MENU = [
   { to: '/ofertas',           label: 'Ofertas disponibles', icon: '💼' },
   { to: '/mis-inscripciones', label: 'Mis inscripciones',   icon: '📋' },
   { to: '/perfil',            label: 'Mi perfil',           icon: '👤' },
+  { to: '/acerca',            label: 'Sobre nosotros',      icon: 'ℹ️' },
 ];
 
 function initials(name = '') {

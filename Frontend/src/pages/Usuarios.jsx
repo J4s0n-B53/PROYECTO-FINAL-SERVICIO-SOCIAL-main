@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../services/apiClient';
-import { PageHeader, TableWrap, Th, Td, Badge, Spinner, useToast, Toast } from '../components/UI';
+import { PageHeader, TableWrap, Th, Td, Badge, Modal, Spinner, useToast, Toast } from '../components/UI';
 
 export default function Usuarios() {
   const [usuarios, setUsuarios] = useState([]);
@@ -11,6 +11,7 @@ export default function Usuarios() {
   const [editandoHorasId, setEditandoHorasId] = useState(null);
   const [horasManuales, setHorasManuales] = useState({});
   const [savingHorasId, setSavingHorasId] = useState(null);
+  const [confirmacionHoras, setConfirmacionHoras] = useState(null);
   const { toast, show } = useToast();
 
   async function loadUsuarios() {
@@ -18,7 +19,7 @@ export default function Usuarios() {
       const r = await api.get('/usuarios');
       setUsuarios(r.data);
       setHorasManuales(Object.fromEntries(
-        r.data.map(u => [u.id_usuario, Number(u.horas_manuales ?? 0)])
+        r.data.map(u => [u.id_usuario, 0])
       ));
     } catch {
       show('Error al cargar usuarios','error');
@@ -32,27 +33,38 @@ export default function Usuarios() {
   }, []);
 
   function editarHoras(u) {
-    setHorasManuales(prev => ({ ...prev, [u.id_usuario]: Number(u.horas_manuales ?? 0) }));
+    setHorasManuales(prev => ({ ...prev, [u.id_usuario]: 0 }));
     setEditandoHorasId(u.id_usuario);
   }
 
   function cancelarHoras(u) {
-    setHorasManuales(prev => ({ ...prev, [u.id_usuario]: Number(u.horas_manuales ?? 0) }));
+    setHorasManuales(prev => ({ ...prev, [u.id_usuario]: 0 }));
     setEditandoHorasId(null);
   }
 
   async function confirmarHoras(u) {
     const horas = Number(horasManuales[u.id_usuario] ?? 0);
-    if (!Number.isInteger(horas) || horas < 0 || horas > 500) {
-      show('Ingresa una cantidad válida entre 0 y 500 horas', 'error');
+    if (!Number.isInteger(horas) || horas <= 0 || horas > 500) {
+      show('Ingresa una cantidad valida entre 1 y 500 horas', 'error');
       return;
     }
 
+    setConfirmacionHoras({ usuario: u, horas });
+  }
+
+  async function guardarHorasConfirmadas() {
+    if (!confirmacionHoras) return;
+
+    const u = confirmacionHoras.usuario;
+    const horas = confirmacionHoras.horas;
+
     setSavingHorasId(u.id_usuario);
     try {
-      await api.patch(`/usuarios/${u.id_usuario}/horas-manuales`, { horas_manuales: horas });
-      show('Horas manuales actualizadas');
+      const { data } = await api.patch(`/usuarios/${u.id_usuario}/horas-manuales`, { horas_manuales: horas });
+      const acreditadas = Number(data.horas_acreditadas ?? horas);
+      show(data.ajustado ? `Se acreditaron ${acreditadas} horas, que era el espacio disponible` : `${acreditadas} horas acreditadas`);
       setEditandoHorasId(null);
+      setConfirmacionHoras(null);
       await loadUsuarios();
     } catch (e) {
       show(e.response?.data?.error || 'Error al acreditar horas', 'error');
@@ -146,9 +158,9 @@ export default function Usuarios() {
             boxShadow:'0 1px 3px rgba(10,27,78,.06)'
           }}
         >
-          <option value="">Todas las horas</option>
-          <option value="completos">Horas completadas</option>
-          <option value="pendientes">Horas pendientes</option>
+          <option value="">Todos los estudiantes</option>
+          <option value="completos">Servicio social completado</option>
+          <option value="pendientes">Servicio social pendiente</option>
         </select>
       </div>
       <TableWrap>
@@ -161,28 +173,33 @@ export default function Usuarios() {
             const editando = editandoHorasId === u.id_usuario;
             const saving = savingHorasId === u.id_usuario;
             const esEstudiante = u.rol === 'estudiante';
+            const rowActiveStyle = editando
+              ? { background:'#0A1B4E', color:'#fff', transition:'background .2s ease, color .2s ease' }
+              : {};
+            const mainTextColor = editando ? '#fff' : 'var(--text)';
+            const secondaryTextColor = editando ? 'rgba(255,255,255,.78)' : 'var(--text2)';
 
             return (
             <tr key={u.id_usuario}>
-              <Td><b style={{ color:'var(--text)' }}>{u.nombre_completo}</b></Td>
-              <Td style={{ fontSize:12 }}>{u.correo_institucional}</Td>
-              <Td style={{ fontSize:12 }}>{u.nombre_carrera || <span style={{ color:'var(--text3)' }}>—</span>}</Td>
-              <Td style={{ fontSize:12 }}>{u.nombre_facultad || <span style={{ color:'var(--text3)' }}>—</span>}</Td>
-              <Td>
+              <Td style={rowActiveStyle}><b style={{ color:mainTextColor }}>{u.nombre_completo}</b></Td>
+              <Td style={{ ...rowActiveStyle, fontSize:12, color:secondaryTextColor }}>{u.correo_institucional}</Td>
+              <Td style={{ ...rowActiveStyle, fontSize:12, color:secondaryTextColor }}>{u.nombre_carrera || '-'}</Td>
+              <Td style={{ ...rowActiveStyle, fontSize:12, color:secondaryTextColor }}>{u.nombre_facultad || '-'}</Td>
+              <Td style={rowActiveStyle}>
                 <span style={{
                   fontSize:12, padding:'3px 8px', borderRadius:4, fontWeight:500,
-                  background: u.materias_aprobadas>=30 ? 'rgba(34,199,138,.15)' : 'rgba(245,166,35,.15)',
-                  color: u.materias_aprobadas>=30 ? 'var(--green)' : 'var(--amber)'
+                  background: editando ? 'rgba(255,255,255,.16)' : u.materias_aprobadas>=30 ? 'rgba(34,199,138,.15)' : 'rgba(245,166,35,.15)',
+                  color: editando ? '#fff' : u.materias_aprobadas>=30 ? 'var(--green)' : 'var(--amber)'
                 }}>{u.materias_aprobadas}</span>
               </Td>
-              <Td>
+              <Td style={rowActiveStyle}>
                 <span style={{
                   fontSize:12, padding:'3px 8px', borderRadius:4, fontWeight:600,
-                  background: horas>=500 ? 'rgba(34,199,138,.15)' : 'rgba(10,27,78,.08)',
-                  color: horas>=500 ? 'var(--green)' : 'var(--text2)'
+                  background: editando ? 'rgba(255,255,255,.16)' : horas>=500 ? 'rgba(34,199,138,.15)' : 'rgba(10,27,78,.08)',
+                  color: editando ? '#fff' : horas>=500 ? 'var(--green)' : 'var(--text2)'
                 }}>{horas}h</span>
               </Td>
-              <Td>
+              <Td style={rowActiveStyle}>
                 {esEstudiante ? (
                   <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
                     <input
@@ -212,9 +229,9 @@ export default function Usuarios() {
                           onClick={() => confirmarHoras(u)}
                           disabled={saving}
                           style={{
-                            border:'1px solid rgba(15,158,110,.30)',
-                            background:'rgba(15,158,110,.10)',
-                            color:'var(--green)',
+                            border: editando ? '1px solid rgba(111,224,184,.85)' : '1px solid rgba(15,158,110,.30)',
+                            background: editando ? 'rgba(111,224,184,.24)' : 'rgba(15,158,110,.10)',
+                            color: editando ? '#b8ffe6' : 'var(--green)',
                             borderRadius:6,
                             padding:'6px 9px',
                             fontFamily:'inherit',
@@ -223,16 +240,16 @@ export default function Usuarios() {
                             opacity: saving ? .55 : 1
                           }}
                         >
-                          {saving ? 'Guardando...' : 'Confirmar'}
+                          {saving ? 'Guardando...' : 'Acreditar'}
                         </button>
                         <button
                           type="button"
                           onClick={() => cancelarHoras(u)}
                           disabled={saving}
                           style={{
-                            border:'1px solid rgba(10,27,78,.18)',
+                            border: editando ? '1px solid rgba(255,255,255,.45)' : '1px solid rgba(10,27,78,.18)',
                             background:'none',
-                            color:'var(--text2)',
+                            color: editando ? '#fff' : 'var(--text2)',
                             borderRadius:6,
                             padding:'6px 9px',
                             fontFamily:'inherit',
@@ -248,9 +265,9 @@ export default function Usuarios() {
                         type="button"
                         onClick={() => editarHoras(u)}
                         style={{
-                          border:'1px solid rgba(10,27,78,.18)',
-                          background:'none',
-                          color:'var(--text2)',
+                          border:'1px solid rgba(15,158,110,.30)',
+                          background:'rgba(15,158,110,.10)',
+                          color:'var(--green)',
                           borderRadius:6,
                           padding:'6px 9px',
                           fontFamily:'inherit',
@@ -258,7 +275,7 @@ export default function Usuarios() {
                           cursor:'pointer'
                         }}
                       >
-                        Editar
+                        Acreditar
                       </button>
                     )}
                   </div>
@@ -266,7 +283,22 @@ export default function Usuarios() {
                   <span style={{ color:'var(--text3)' }}>—</span>
                 )}
               </Td>
-              <Td><Badge type={u.rol}>{u.rol}</Badge></Td>
+              <Td style={rowActiveStyle}>
+                {editando ? (
+                  <span style={{
+                    fontSize:12,
+                    padding:'3px 10px',
+                    borderRadius:999,
+                    fontWeight:700,
+                    background:'rgba(255,255,255,.16)',
+                    color:'#fff'
+                  }}>
+                    {u.rol}
+                  </span>
+                ) : (
+                  <Badge type={u.rol}>{u.rol}</Badge>
+                )}
+              </Td>
             </tr>
             );
           })}
@@ -279,7 +311,61 @@ export default function Usuarios() {
           )}
         </tbody>
       </TableWrap>
+      <Modal
+        open={!!confirmacionHoras}
+        onClose={() => {
+          if (!savingHorasId) setConfirmacionHoras(null);
+        }}
+        title="Acreditar horas"
+        width={440}
+        footer={(
+          <>
+            <button
+              type="button"
+              onClick={() => setConfirmacionHoras(null)}
+              disabled={!!savingHorasId}
+              style={{
+                border:'1px solid rgba(10,27,78,.18)',
+                background:'none',
+                color:'var(--text2)',
+                borderRadius:6,
+                padding:'8px 14px',
+                fontFamily:'inherit',
+                fontSize:13,
+                cursor: savingHorasId ? 'not-allowed' : 'pointer'
+              }}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={guardarHorasConfirmadas}
+              disabled={!!savingHorasId}
+              style={{
+                border:'1px solid rgba(15,158,110,.30)',
+                background:'rgba(15,158,110,.10)',
+                color:'var(--green)',
+                borderRadius:6,
+                padding:'8px 14px',
+                fontFamily:'inherit',
+                fontSize:13,
+                fontWeight:600,
+                cursor: savingHorasId ? 'not-allowed' : 'pointer',
+                opacity: savingHorasId ? .55 : 1
+              }}
+            >
+              {savingHorasId ? 'Acreditando...' : 'Aceptar'}
+            </button>
+          </>
+        )}
+      >
+        <p style={{ color:'var(--text2)', fontSize:14, lineHeight:1.6 }}>
+          ¿Estas seguro de acreditar <strong style={{ color:'var(--text)' }}>{confirmacionHoras?.horas || 0} horas</strong> a{' '}
+          <strong style={{ color:'var(--text)' }}>{confirmacionHoras?.usuario?.nombre_completo}</strong>?
+        </p>
+      </Modal>
       <Toast toast={toast} />
     </>
   );
 }
+

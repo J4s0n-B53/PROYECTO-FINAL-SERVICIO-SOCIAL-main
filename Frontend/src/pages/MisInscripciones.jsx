@@ -95,7 +95,7 @@ function generarPDF(d) {
     <p class="doc-title">CONSTANCIA DE SERVICIO SOCIAL</p>
     <p class="doc-sub">Documento oficial de acreditaci&oacute;n &mdash; ${d.horas_acreditar} horas acreditadas</p>
 
-    <div class="badge"><span>&#10003; Servicio Social Completado</span></div>
+    <div class="badge"><span>&#10003; Actividad completada</span></div>
 
     <p class="body-text">
       La <strong>Universidad de Sonsonate</strong>, a trav&eacute;s de la Coordinaci&oacute;n de Servicio Social,
@@ -103,7 +103,7 @@ function generarPDF(d) {
       con correo institucional <strong>${d.correo_institucional}</strong>, perteneciente a la carrera de
       <strong>${d.nombre_carrera || 'No especificada'}</strong>
       (Facultad de ${d.nombre_facultad || 'No especificada'}),
-      complet&oacute; satisfactoriamente su servicio social en la actividad denominada
+      complet&oacute; satisfactoriamente la actividad denominada
       <strong>"${d.oferta_titulo}"</strong>, acumulando un total de
       <strong>${d.horas_acreditar} horas</strong> acreditadas.
     </p>
@@ -150,13 +150,20 @@ function generarPDF(d) {
 /* Componente principal */
 export default function MisInscripciones() {
   const [data,         setData]         = useState([]);
+  const [perfil,       setPerfil]       = useState(null);
   const [loading,      setLoading]      = useState(true);
   const [loadingRep,   setLoadingRep]   = useState(null); // id de la inscripción que está cargando
   const { toast, show } = useToast();
 
   useEffect(() => {
-    api.get('/inscripciones')
-      .then(r => setData(r.data))
+    Promise.all([
+      api.get('/inscripciones'),
+      api.get('/usuarios/me')
+    ])
+      .then(([inscripciones, usuario]) => {
+        setData(inscripciones.data);
+        setPerfil(usuario.data);
+      })
       .catch(() => show('Error al cargar', 'error'))
       .finally(() => setLoading(false));
   }, []);
@@ -175,7 +182,8 @@ export default function MisInscripciones() {
 
   if (loading) return <Spinner />;
 
-  const horasAcred   = data.filter(i => i.estado === 'finalizado').reduce((a, i) => a + (i.horas_acreditar || 0), 0);
+  const horasPorOfertas = data.filter(i => i.estado === 'finalizado').reduce((a, i) => a + (i.horas_acreditar || 0), 0);
+  const horasAcred   = Number(perfil?.horas_acumuladas ?? horasPorOfertas);
   const horasActivas = data.filter(i => i.estado === 'aceptado').reduce((a, i)   => a + (i.horas_acreditar || 0), 0);
   const totalInscripciones = data.filter(i => i.estado !== 'rechazado').length;
 
@@ -198,7 +206,6 @@ export default function MisInscripciones() {
               <Th>Oferta</Th>
               <Th>Horas</Th>
               <Th>Ubicación</Th>
-              <Th>Horario</Th>
               <Th>Fecha inscripción</Th>
               <Th>Estado</Th>
               <Th>Reporte</Th>
@@ -209,7 +216,6 @@ export default function MisInscripciones() {
                   <Td><b style={{ color: 'var(--text)' }}>{i.oferta_titulo}</b></Td>
                   <Td><Tag color="blue">{i.horas_acreditar}h</Tag></Td>
                   <Td style={{ fontSize: 12 }}>{i.ubicacion || '—'}</Td>
-                  <Td style={{ fontSize: 12 }}>{i.horario || '—'}</Td>
                   <Td style={{ fontSize: 12 }}>{new Date(i.fecha_inscripcion).toLocaleDateString('es-SV')}</Td>
                   <Td><Badge type={i.estado}>{i.estado}</Badge></Td>
                   <Td>
