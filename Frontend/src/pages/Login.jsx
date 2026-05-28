@@ -39,9 +39,10 @@ export default function Login() {
       <style>{`
         .login-page {
           display: flex;
-          align-items: center;
-          justify-content: center;
+          align-items: flex-start;
+          justify-content: flex-start;
           min-height: 100vh;
+          padding: 72px 0 0 76px;
           background-image:
             linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)),
             url('/USO.jpg');
@@ -51,11 +52,11 @@ export default function Login() {
         }
         .login-container {
           display: flex;
-          width: 850px;
-          max-width: 95vw;
-          min-height: 520px;
+          width: 720px;
+          max-width: calc(100vw - 112px);
+          min-height: 430px;
           background: #fff;
-          border-radius: 20px;
+          border-radius: 16px;
           overflow: hidden;
           box-shadow: 0 14px 28px rgba(0,0,0,0.18), 0 10px 10px rgba(0,0,0,0.12);
         }
@@ -64,11 +65,11 @@ export default function Login() {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 48px 40px;
+          padding: 36px 34px;
         }
         .login-form {
           width: 100%;
-          max-width: 395px;
+          max-width: 390px;
           display: flex;
           flex-direction: column;
         }
@@ -98,14 +99,14 @@ export default function Login() {
           letter-spacing: 1px;
         }
         .login-subtitle {
-          font-size: 13px;
+          font-size: 12px;
           color: #4a5578;
-          margin-bottom: 32px;
+          margin-bottom: 24px;
           line-height: 1.5;
           white-space: nowrap;
         }
         .login-field {
-          margin-bottom: 18px;
+          margin-bottom: 14px;
         }
         .login-field label {
           display: block;
@@ -119,7 +120,7 @@ export default function Login() {
           background: #f0f2f7;
           border: 1px solid rgba(10,27,78,.18);
           border-radius: 8px;
-          padding: 12px 14px;
+          padding: 10px 12px;
           font-size: 14px;
           color: #0d1b3e;
           outline: none;
@@ -135,7 +136,7 @@ export default function Login() {
           color: #fff;
           border: none;
           border-radius: 8px;
-          padding: 13px;
+          padding: 11px;
           font-size: 14px;
           font-weight: 600;
           font-family: inherit;
@@ -163,23 +164,23 @@ export default function Login() {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 40px;
+          padding: 32px;
           text-align: center;
           color: #fff;
         }
         .login-overlay-content h1 {
-          font-size: 26px;
+          font-size: 24px;
           font-weight: 700;
           margin-bottom: 16px;
         }
         .login-overlay-content {
-          transform: translateY(-34px);
+          transform: translateY(-22px);
         }
         .login-welcome-logo {
-          width: 118px;
-          height: 118px;
+          width: 96px;
+          height: 96px;
           object-fit: contain;
-          margin: 0 auto 22px;
+          margin: 0 auto 18px;
           filter: drop-shadow(0 10px 18px rgba(0,0,0,.18));
         }
         .login-overlay-content p {
@@ -188,6 +189,11 @@ export default function Login() {
           opacity: .9;
         }
         @media (max-width: 640px) {
+          .login-page {
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+          }
           .login-container { flex-direction: column; }
           .login-form-side { width: 100%; padding: 36px 24px; }
           .login-overlay-side {

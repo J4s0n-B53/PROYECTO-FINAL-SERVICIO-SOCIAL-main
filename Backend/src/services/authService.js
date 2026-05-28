@@ -24,13 +24,7 @@ async function login(correo, password) {
 
   const user = rows[0];
 
-  // Soporte para hash bcrypt Y contraseña plana (datos de prueba)
-  let valid = false;
-  if (user.password_hash.startsWith('$2')) {
-    valid = await bcrypt.compare(password, user.password_hash);
-  } else {
-    valid = password === user.password_hash;
-  }
+  const valid = await bcrypt.compare(password, user.password_hash);
 
   if (!valid) throw { status: 401, message: 'Credenciales incorrectas' };
 
@@ -58,4 +52,28 @@ function verifyToken(token) {
   return jwt.verify(token, JWT_SECRET);
 }
 
-module.exports = { login, verifyToken };
+async function getAuthUserById(userId) {
+  const [rows] = await pool.query(
+    `SELECT u.id_usuario, u.nombre_completo, u.correo_institucional,
+            u.rol, u.materias_aprobadas, c.nombre_carrera, u.id_carrera
+     FROM usuarios u
+     LEFT JOIN carreras c ON u.id_carrera = c.id_carrera
+     WHERE u.id_usuario = ?`,
+    [userId]
+  );
+
+  if (!rows.length) throw { status: 404, message: 'Usuario no encontrado' };
+
+  const user = rows[0];
+  return {
+    id: user.id_usuario,
+    nombre: user.nombre_completo,
+    correo: user.correo_institucional,
+    rol: user.rol,
+    materias: user.materias_aprobadas,
+    carrera: user.nombre_carrera || null,
+    id_carrera: user.id_carrera || null,
+  };
+}
+
+module.exports = { login, verifyToken, getAuthUserById };

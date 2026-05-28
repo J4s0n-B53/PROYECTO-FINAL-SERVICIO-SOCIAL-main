@@ -1,5 +1,38 @@
 const authService = require('../services/authService');
 
+const AUTH_COOKIE_NAME = 'sse_auth';
+const COOKIE_MAX_AGE = 8 * 60 * 60 * 1000;
+
+function authCookieOptions() {
+  const isProduction = process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    maxAge: COOKIE_MAX_AGE,
+    path: '/',
+  };
+}
+
+function clearAuthCookieOptions() {
+  const { maxAge, ...options } = authCookieOptions();
+  return options;
+}
+
+function getCookie(req, name) {
+  const raw = req.headers.cookie;
+  if (!raw) return null;
+
+  return raw
+    .split(';')
+    .map(cookie => cookie.trim())
+    .reduce((found, cookie) => {
+      if (found) return found;
+      const [key, ...value] = cookie.split('=');
+      return key === name ? decodeURIComponent(value.join('=')) : null;
+    }, null);
+}
+
 async function login(req, res) {
   const { correo, password } = req.body;
   if (!correo || !password)
@@ -7,23 +40,30 @@ async function login(req, res) {
 
   try {
     const result = await authService.login(correo, password);
-    res.json(result);
+    res.cookie(AUTH_COOKIE_NAME, result.token, authCookieOptions());
+    res.json({ usuario: result.usuario });
   } catch (err) {
     res.status(err.status || 500).json({ error: err.message || 'Error del servidor' });
   }
 }
 
-function me(req, res) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'Token requerido' });
+async function me(req, res) {
+  const token = getCookie(req, AUTH_COOKIE_NAME);
+  if (!token) return res.status(401).json({ error: 'Sesión requerida' });
 
   try {
     const decoded = authService.verifyToken(token);
-    res.json({ valid: true, user: decoded });
+    const usuario = await authService.getAuthUserById(decoded.id);
+    res.json({ valid: true, usuario });
   } catch {
-    res.status(401).json({ error: 'Token inválido o expirado' });
+    res.clearCookie(AUTH_COOKIE_NAME, clearAuthCookieOptions());
+    res.status(401).json({ error: 'Sesión inválida o expirada' });
   }
 }
 
-module.exports = { login, me };
+function logout(req, res) {
+  res.clearCookie(AUTH_COOKIE_NAME, clearAuthCookieOptions());
+  res.json({ mensaje: 'Sesión cerrada' });
+}
+
+module.exports = { login, me, logout, AUTH_COOKIE_NAME, authCookieOptions, getCookie };

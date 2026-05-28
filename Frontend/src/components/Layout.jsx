@@ -25,7 +25,10 @@ export default function Layout() {
   const navigate = useNavigate();
   const menu = user?.rol === 'admin' ? ADMIN_MENU : STUDENT_MENU;
 
-  function handleLogout() { logout(); navigate('/login'); }
+  async function handleLogout() {
+    await logout();
+    navigate('/login');
+  }
 
   return (
     <div style={{ display:'flex', flexDirection:'column', height:'100vh' }}>

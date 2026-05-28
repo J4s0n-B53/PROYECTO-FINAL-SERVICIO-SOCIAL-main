@@ -7,4 +7,7 @@ router.post('/login', authController.login);
 // GET /api/auth/me
 router.get('/me', authController.me);
 
+// POST /api/auth/logout
+router.post('/logout', authController.logout);
+
 module.exports = router;
