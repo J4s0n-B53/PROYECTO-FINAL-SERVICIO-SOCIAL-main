@@ -16,6 +16,11 @@ function validarOferta({ horas_acreditar, cupo_maximo }) {
     throw { status: 400, message: 'El cupo máximo debe ser mayor a 0' };
 }
 
+function validarCamposObligatorios({ titulo, descripcion, ubicacion, fecha_inicio, fecha_fin, hora_inicio, hora_fin }) {
+  if (!titulo || !descripcion || !ubicacion || !fecha_inicio || !fecha_fin || !hora_inicio || !hora_fin)
+    throw { status: 400, message: 'Completa titulo, descripcion, ubicacion, fechas y horas' };
+}
+
 function validarFechas({ fecha_inicio, fecha_fin, hora_inicio, hora_fin }) {
   if (fecha_inicio && fecha_fin && fecha_inicio > fecha_fin)
     throw { status: 400, message: 'La fecha de finalización no puede ser anterior a la fecha de inicio' };
@@ -54,6 +59,7 @@ async function create({ titulo, descripcion, ubicacion, horario, fecha_inicio, f
                         imagen_url, cupo_maximo, id_carrera, es_ambiental }, adminId) {
   const ambiental = toBoolean(es_ambiental);
   const horas = ambiental ? HORAS_AMBIENTALES : horas_acreditar;
+  validarCamposObligatorios({ titulo, descripcion, ubicacion, fecha_inicio, fecha_fin, hora_inicio, hora_fin });
   validarOferta({ horas_acreditar: horas, cupo_maximo });
   validarFechas({ fecha_inicio, fecha_fin, hora_inicio, hora_fin });
 
@@ -74,6 +80,7 @@ async function update(id, { titulo, descripcion, ubicacion, horario, fecha_inici
                             imagen_url, cupo_maximo, id_carrera, activo, es_ambiental }) {
   const ambiental = toBoolean(es_ambiental);
   const horas = ambiental ? HORAS_AMBIENTALES : horas_acreditar;
+  validarCamposObligatorios({ titulo, descripcion, ubicacion, fecha_inicio, fecha_fin, hora_inicio, hora_fin });
   validarOferta({ horas_acreditar: horas, cupo_maximo });
   validarFechas({ fecha_inicio, fecha_fin, hora_inicio, hora_fin });
 

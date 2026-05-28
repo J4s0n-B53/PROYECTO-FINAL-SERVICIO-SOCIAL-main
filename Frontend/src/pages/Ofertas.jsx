@@ -9,7 +9,7 @@ import {
 const EMPTY_FORM = {
   titulo:'', descripcion:'', ubicacion:'', horario:'',
   fecha_inicio:'', fecha_fin:'', hora_inicio:'', hora_fin:'',
-  horas_acreditar:150, cupo_maximo:5, id_carrera:'', imagen_url:'', activo:true, es_ambiental:false
+  horas_acreditar:25, cupo_maximo:1, id_carrera:'', imagen_url:'', activo:true, es_ambiental:false
 };
 const MIN_MATERIAS_APROBADAS = 30;
 const META_HORAS = 500;
@@ -377,9 +377,16 @@ export default function Ofertas({ historial = false }) {
   }
 
   async function saveOferta() {
-    if (!form.titulo || !form.descripcion) { show('Título y descripción requeridos','error'); return; }
+    if (!form.titulo || !form.descripcion || !form.ubicacion || !form.fecha_inicio || !form.fecha_fin || !form.hora_inicio || !form.hora_fin) {
+      show('Completa título, descripción, ubicación, fechas y horas', 'error');
+      return;
+    }
     if (form.horas_acreditar < 1 || form.horas_acreditar > 500) {
       show('Las horas a acreditar deben estar entre 1 y 500', 'error');
+      return;
+    }
+    if (form.cupo_maximo < 1) {
+      show('El cupo máximo debe ser mayor o igual a 1', 'error');
       return;
     }
     const fechaInicio = inputToDate(form.fecha_inicio);
@@ -658,14 +665,14 @@ export default function Ofertas({ historial = false }) {
           <Btn variant="accent"  onClick={saveOferta} disabled={saving}>{saving ? 'Guardando...' : 'Guardar'}</Btn>
         </>}
       >
-        <Field label="Título"><Input value={form.titulo} onChange={e=>setForm({...form,titulo:e.target.value})} placeholder="Ej. Apoyo Comunitario en TI" /></Field>
-        <Field label="Descripción"><Textarea value={form.descripcion} onChange={e=>setForm({...form,descripcion:e.target.value})} /></Field>
+        <Field label="Título"><Input required value={form.titulo} onChange={e=>setForm({...form,titulo:e.target.value})} placeholder="Escribir título" /></Field>
+        <Field label="Descripción"><Textarea required value={form.descripcion} onChange={e=>setForm({...form,descripcion:e.target.value})} placeholder="Escribir descripción" /></Field>
         <div style={{ display:'grid', gridTemplateColumns:'1fr', gap:12 }}>
-          <Field label="Ubicación"><Input value={form.ubicacion} onChange={e=>setForm({...form,ubicacion:e.target.value})} placeholder="Campus Central" /></Field>
+          <Field label="Ubicación"><Input required value={form.ubicacion} onChange={e=>setForm({...form,ubicacion:e.target.value})} placeholder="Escribir ubicación" /></Field>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-          <Field label="Fecha de inicio"><Input type="date" value={form.fecha_inicio} onChange={e=>setForm({...form,fecha_inicio:e.target.value})} /></Field>
-          <Field label="Fecha de finalización"><Input type="date" value={form.fecha_fin} onChange={e=>setForm({...form,fecha_fin:e.target.value})} /></Field>
+          <Field label="Fecha de inicio"><Input required type="date" value={form.fecha_inicio} onChange={e=>setForm({...form,fecha_inicio:e.target.value})} /></Field>
+          <Field label="Fecha de finalización"><Input required type="date" value={form.fecha_fin} onChange={e=>setForm({...form,fecha_fin:e.target.value})} /></Field>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
           <Field label="Hora de inicio">
@@ -676,8 +683,8 @@ export default function Ofertas({ historial = false }) {
           </Field>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-          <Field label="Horas a acreditar"><Input type="number" value={form.es_ambiental ? 25 : form.horas_acreditar} disabled={form.es_ambiental} onChange={e=>setForm({...form,horas_acreditar:+e.target.value})} min={1} max={500} /></Field>
-          <Field label="Cupo máximo"><Input type="number" value={form.cupo_maximo} onChange={e=>setForm({...form,cupo_maximo:+e.target.value})} min={1} /></Field>
+          <Field label="Horas a acreditar"><Input required type="number" value={form.es_ambiental ? 25 : form.horas_acreditar} disabled={form.es_ambiental} onChange={e=>setForm({...form,horas_acreditar:+e.target.value})} min={1} max={500} /></Field>
+          <Field label="Cupo máximo"><Input required type="number" value={form.cupo_maximo} onChange={e=>setForm({...form,cupo_maximo:+e.target.value})} min={1} /></Field>
         </div>
         <label style={{
           display:'flex',
@@ -695,8 +702,8 @@ export default function Ofertas({ historial = false }) {
           />
           Actividad ambiental (25 horas obligatorias)
         </label>
-        <Field label="Carrera (opcional)">
-          <Select value={form.id_carrera} onChange={e=>setForm({...form,id_carrera:e.target.value})}>
+        <Field label="Carrera">
+          <Select required value={form.id_carrera} onChange={e=>setForm({...form,id_carrera:e.target.value})}>
             <option value="">Todas las carreras</option>
             {carreras.map(c => <option key={c.id_carrera} value={c.id_carrera}>{c.nombre_carrera}</option>)}
           </Select>

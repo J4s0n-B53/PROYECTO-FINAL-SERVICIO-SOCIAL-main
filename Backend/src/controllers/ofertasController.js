@@ -46,8 +46,11 @@ async function getById(req, res) {
 }
 
 async function create(req, res) {
-  const { titulo, descripcion, horas_acreditar, cupo_maximo, es_ambiental } = req.body;
-  if (!titulo || !descripcion || (!es_ambiental && !horas_acreditar) || !cupo_maximo)
+  const {
+    titulo, descripcion, ubicacion, fecha_inicio, fecha_fin, hora_inicio, hora_fin,
+    horas_acreditar, cupo_maximo, es_ambiental
+  } = req.body;
+  if (!titulo || !descripcion || !ubicacion || !fecha_inicio || !fecha_fin || !hora_inicio || !hora_fin || (!es_ambiental && !horas_acreditar) || !cupo_maximo)
     return res.status(400).json({ error: 'Faltan campos obligatorios' });
 
   try {

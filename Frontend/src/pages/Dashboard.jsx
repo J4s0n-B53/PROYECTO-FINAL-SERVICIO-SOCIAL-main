@@ -183,7 +183,6 @@ export default function Dashboard() {
 
   const activas    = ofertas.filter(o => o.activo).length;
   const pendientes = inscripciones.filter(i => i.estado === 'pendiente').length;
-  const finalizados= inscripciones.filter(i => i.estado === 'finalizado').length;
   const recientes  = [...inscripciones].slice(0, 8);
 
   const estudiantesCompletos = usuarios
@@ -212,7 +211,7 @@ export default function Dashboard() {
         <StatCard label="Ofertas activas" value={activas}              sub="plazas disponibles"  color="blue"   />
         <StatCard label="Inscripciones"   value={inscripciones.length} sub="total registradas"   color="green"  />
         <StatCard label="Pendientes"      value={pendientes}           sub="por revisar"          color="amber"  />
-        <StatCard label="Finalizados"     value={finalizados}          sub="servicio completado"  color="purple" />
+        <StatCard label="Finalizados"     value={estudiantesCompletos.length} sub="500 horas completadas" color="purple" />
       </div>
 
       {/* Inscripciones recientes */}
