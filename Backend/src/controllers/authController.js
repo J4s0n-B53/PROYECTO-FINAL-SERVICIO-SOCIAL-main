@@ -36,7 +36,7 @@ function getCookie(req, name) {
 async function login(req, res) {
   const { correo, password } = req.body;
   if (!correo || !password)
-    return res.status(400).json({ error: 'Correo y contraseña requeridos' });
+    return res.status(400).json({ error: 'Correo y contrasena requeridos' });
 
   try {
     const result = await authService.login(correo, password);
@@ -49,7 +49,7 @@ async function login(req, res) {
 
 async function me(req, res) {
   const token = getCookie(req, AUTH_COOKIE_NAME);
-  if (!token) return res.status(401).json({ error: 'Sesión requerida' });
+  if (!token) return res.json({ valid: false, usuario: null });
 
   try {
     const decoded = authService.verifyToken(token);
@@ -57,13 +57,13 @@ async function me(req, res) {
     res.json({ valid: true, usuario });
   } catch {
     res.clearCookie(AUTH_COOKIE_NAME, clearAuthCookieOptions());
-    res.status(401).json({ error: 'Sesión inválida o expirada' });
+    res.json({ valid: false, usuario: null });
   }
 }
 
 function logout(req, res) {
   res.clearCookie(AUTH_COOKIE_NAME, clearAuthCookieOptions());
-  res.json({ mensaje: 'Sesión cerrada' });
+  res.json({ mensaje: 'Sesion cerrada' });
 }
 
 module.exports = { login, me, logout, AUTH_COOKIE_NAME, authCookieOptions, getCookie };

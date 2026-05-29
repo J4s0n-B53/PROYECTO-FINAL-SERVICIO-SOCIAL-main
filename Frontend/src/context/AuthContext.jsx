@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/apiClient';
 
 const AuthContext = createContext(null);
+const IDLE_TIMEOUT_MS = 60 * 60 * 1000;
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -11,7 +12,7 @@ export function AuthProvider({ children }) {
     async function verificarSesion() {
       try {
         const { data } = await api.get('/auth/me');
-        setUser(data.usuario);
+        setUser(data.valid ? data.usuario : null);
       } catch {
         setUser(null);
       } finally {
@@ -21,6 +22,28 @@ export function AuthProvider({ children }) {
 
     verificarSesion();
   }, []);
+
+  useEffect(() => {
+    if (!user) return undefined;
+
+    let timeoutId;
+    const activityEvents = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+
+    function resetIdleTimer() {
+      window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => {
+        logout();
+      }, IDLE_TIMEOUT_MS);
+    }
+
+    resetIdleTimer();
+    activityEvents.forEach(event => window.addEventListener(event, resetIdleTimer));
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      activityEvents.forEach(event => window.removeEventListener(event, resetIdleTimer));
+    };
+  }, [user]);
 
   async function login(correo, password) {
     const { data } = await api.post('/auth/login', { correo, password });
