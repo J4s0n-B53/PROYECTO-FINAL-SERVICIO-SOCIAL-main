@@ -201,10 +201,11 @@ function toBoolean(value) {
   return value === true || value === 1 || value === '1' || value === 'true';
 }
 
-function TimeSelect({ value, onChange }) {
+function TimeSelect({ value, onChange, id, name }) {
   return (
     <Input
-      name="hora-oferta"
+      id={id}
+      name={name || 'hora-oferta'}
       type="time"
       value={value || ''}
       onChange={e => onChange(e.target.value)}

@@ -128,10 +128,15 @@ export function Modal({ open, onClose, title, children, footer, width = 500 }) {
 
 // ── Field ──────────────────────────────
 export function Field({ label, children }) {
+  const reactId = useId();
+  const child = isValidElement(children) ? children : null;
+  const fieldId = child?.props?.id || child?.props?.name || `field-${reactId.replace(/:/g, '')}`;
+  const fieldName = child?.props?.name || fieldId;
+
   return (
     <div style={{ marginBottom: 16 }}>
-      <label style={{ display:'block', fontSize:12, fontWeight:500, color:'var(--text2)', marginBottom:7 }}>{label}</label>
-      {children}
+      <label htmlFor={fieldId} style={{ display:'block', fontSize:12, fontWeight:500, color:'var(--text2)', marginBottom:7 }}>{label}</label>
+      {child ? cloneElement(child, { id: fieldId, name: fieldName }) : children}
     </div>
   );
 }
@@ -175,7 +180,7 @@ export function CupoBar({ actual, max }) {
 }
 
 // ── Toast ──────────────────────────────
-import { useState, useEffect, useId } from 'react';
+import { useState, useEffect, useId, isValidElement, cloneElement } from 'react';
 export function useToast() {
   const [toast, setToast] = useState(null);
   function show(msg, type = 'success') {

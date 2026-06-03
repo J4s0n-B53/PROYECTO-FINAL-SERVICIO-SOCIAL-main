@@ -218,7 +218,7 @@ export default function Login() {
               </p>
 
               <div className="login-field">
-                <label>Correo institucional</label>
+                <label htmlFor="login-correo">Correo institucional</label>
                 <input
                   id="login-correo"
                   name="correo"
@@ -234,7 +234,7 @@ export default function Login() {
               </div>
 
               <div className="login-field">
-                <label>Contraseña</label>
+                <label htmlFor="login-password">Contraseña</label>
                 <input
                   id="login-password"
                   name="password"
