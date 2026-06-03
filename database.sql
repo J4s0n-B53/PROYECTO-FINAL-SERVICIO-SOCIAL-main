@@ -1,5 +1,5 @@
 -- Base de presentacion del Sistema de Servicio Social Estudiantil
--- Generado desde la base local SistemaServicioSocial el 2026-06-02 20:14:15
+-- Generado desde la base local SistemaServicioSocial el 2026-06-02 20:33:16
 -- Incluye facultades, carreras con codigo institucional, administrador, estudiantes y ofertas de presentacion.
 -- Los correos institucionales de estudiantes usan iniciales de apellidos, anio de ingreso, codigo de carrera y correlativo.
 -- El anio de ingreso varia segun el avance academico del estudiante.
@@ -79,7 +79,7 @@ CREATE TABLE `ofertas` (
   KEY `id_admin_creador` (`id_admin_creador`),
   CONSTRAINT `ofertas_ibfk_1` FOREIGN KEY (`id_carrera`) REFERENCES `carreras` (`id_carrera`),
   CONSTRAINT `ofertas_ibfk_2` FOREIGN KEY (`id_admin_creador`) REFERENCES `usuarios` (`id_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `inscripciones`;
 CREATE TABLE `inscripciones` (
@@ -95,7 +95,7 @@ CREATE TABLE `inscripciones` (
   KEY `id_oferta` (`id_oferta`),
   CONSTRAINT `inscripciones_ibfk_1` FOREIGN KEY (`id_estudiante`) REFERENCES `usuarios` (`id_usuario`),
   CONSTRAINT `inscripciones_ibfk_2` FOREIGN KEY (`id_oferta`) REFERENCES `ofertas` (`id_oferta`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `horas_manuales_acreditadas`;
 CREATE TABLE `horas_manuales_acreditadas` (
@@ -107,7 +107,7 @@ CREATE TABLE `horas_manuales_acreditadas` (
   PRIMARY KEY (`id_hora_manual`),
   KEY `id_estudiante` (`id_estudiante`),
   CONSTRAINT `horas_manuales_acreditadas_ibfk_1` FOREIGN KEY (`id_estudiante`) REFERENCES `usuarios` (`id_usuario`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 -- =========================================
@@ -215,7 +215,7 @@ INSERT INTO `usuarios` (`id_usuario`, `nombre_completo`, `correo_institucional`,
 (64, 'Edwin Alberto Sorto Lopez', 'sl24e18003@usonsonate.edu.sv', '$2b$10$J6Oql8TSmCQyYjt3pHmqvue08Xv3ry.klXJuGA9/CuA9SrlNPoWra', 'estudiante', 32, 13, '2026-05-28 09:00:00', 0, NULL),
 (65, 'Yesenia Maribel Quintanilla Rivas', 'qr23e18004@usonsonate.edu.sv', '$2b$10$J6Oql8TSmCQyYjt3pHmqvue08Xv3ry.klXJuGA9/CuA9SrlNPoWra', 'estudiante', 38, 13, '2026-05-28 09:00:00', 0, NULL),
 (66, 'Jose David Hernandez Cabrera', 'hc22e18005@usonsonate.edu.sv', '$2b$10$J6Oql8TSmCQyYjt3pHmqvue08Xv3ry.klXJuGA9/CuA9SrlNPoWra', 'estudiante', 45, 13, '2026-05-28 09:00:00', 0, NULL),
-(67, 'Ayleen Sucely Gonzales Rivera', 'gr23i04006@usonsonate.edu.sv', '$2b$10$J6Oql8TSmCQyYjt3pHmqvue08Xv3ry.klXJuGA9/CuA9SrlNPoWra', 'estudiante', 35, 7, '2026-06-02 19:16:23', 375, '2026-06-02 19:29:39');
+(67, 'Ayleen Sucely Gonzales Rivera', 'gr23i04006@usonsonate.edu.sv', '$2b$10$J6Oql8TSmCQyYjt3pHmqvue08Xv3ry.klXJuGA9/CuA9SrlNPoWra', 'estudiante', 35, 7, '2026-06-02 19:16:23', 0, NULL);
 
 -- =========================================
 -- 4. OFERTAS
@@ -228,31 +228,26 @@ INSERT INTO `ofertas` (`id_oferta`, `titulo`, `descripcion`, `ubicacion`, `horar
 (4, 'Educacion Financiera Comunitaria', 'Apoyo en talleres de presupuesto familiar, registro contable basico y orientacion sobre control de ingresos y gastos para pequenos emprendimientos.', 'Centro de Proyeccion Social', NULL, 70, 0, NULL, 8, 0, 1, 4, 1, '2026-05-28 11:56:51', '2026-06-09 00:00:00', '2026-06-23 00:00:00', '08:00:00', '11:30:00'),
 (5, 'Mantenimiento Electrico Preventivo', 'Revision de luminarias, apoyo en diagnostico de instalaciones electricas y elaboracion de reportes de mantenimiento preventivo en espacios academicos.', 'Campus Central', NULL, 80, 0, NULL, 6, 0, 1, 5, 1, '2026-05-28 11:56:51', '2026-06-08 00:00:00', '2026-06-19 00:00:00', '08:00:00', '12:00:00'),
 (6, 'Mejora de Procesos Institucionales', 'Levantamiento de procesos, identificacion de tiempos de espera y propuesta de mejoras para optimizar la atencion en unidades administrativas.', 'Oficinas Administrativas USO', NULL, 90, 0, NULL, 8, 0, 1, 6, 1, '2026-05-28 11:56:51', '2026-06-11 00:00:00', '2026-06-26 00:00:00', '08:00:00', '12:00:00'),
-(7, 'Soporte Tecnico y Digitalizacion', 'Apoyo en mantenimiento basico de equipos, asistencia a usuarios, digitalizacion de documentos y actualizacion de registros internos.', 'Laboratorio de Informatica', NULL, 100, 0, NULL, 10, 1, 1, 7, 1, '2026-05-28 11:56:51', '2026-06-08 00:00:00', '2026-06-26 00:00:00', '08:00:00', '12:00:00'),
+(7, 'Soporte Tecnico y Digitalizacion', 'Apoyo en mantenimiento basico de equipos, asistencia a usuarios, digitalizacion de documentos y actualizacion de registros internos.', 'Laboratorio de Informatica', NULL, 100, 0, NULL, 10, 0, 1, 7, 1, '2026-05-28 11:56:51', '2026-06-08 00:00:00', '2026-06-26 00:00:00', '08:00:00', '12:00:00'),
 (8, 'Jornada Ambiental y Huerto Universitario', 'Participacion en limpieza de areas verdes, clasificacion de residuos, preparacion de compostaje y mantenimiento del huerto universitario.', 'CITAM', NULL, 25, 1, NULL, 10, 0, 1, 8, 1, '2026-05-28 11:56:51', '2026-06-12 00:00:00', '2026-06-12 00:00:00', '08:00:00', '13:00:00'),
 (9, 'Acompanamiento Psicoeducativo', 'Apoyo en talleres de habilidades socioemocionales, aplicacion de dinamicas grupales y registro de asistencia en actividades de bienestar estudiantil.', 'Bienestar Estudiantil', NULL, 70, 0, NULL, 8, 0, 1, 9, 1, '2026-05-28 11:56:51', '2026-06-09 00:00:00', '2026-06-24 00:00:00', '09:00:00', '12:00:00'),
 (10, 'Acompañamiento Psicoeducativo', 'Apoyo en tutorias de matematica basica para estudiantes de primer ingreso, elaboracion de guias y registro de avances academicos.', 'Aulas de Apoyo Academico', NULL, 70, 0, NULL, 8, 0, 1, 10, 1, '2026-05-28 11:56:51', '2026-06-10 00:00:00', '2026-06-25 00:00:00', '08:00:00', '11:00:00'),
 (11, 'Club de Ciencias y Medio Ambiente', 'Apoyo en demostraciones cientificas, preparacion de materiales didacticos y actividades de sensibilizacion sobre el cuidado de recursos naturales.', 'Laboratorio de Ciencias', NULL, 80, 0, NULL, 8, 0, 1, 11, 1, '2026-05-28 11:56:51', '2026-06-11 00:00:00', '2026-06-26 00:00:00', '08:00:00', '12:00:00'),
 (12, 'Promocion de Lectura Comunitaria', 'Organizacion de circulos de lectura, apoyo en correccion de textos y dinamicas de expresion oral para jovenes de comunidades cercanas.', 'Biblioteca Universitaria', NULL, 60, 0, NULL, 8, 0, 1, 12, 1, '2026-05-28 11:56:51', '2026-06-08 00:00:00', '2026-06-21 00:00:00', '09:00:00', '12:00:00'),
 (13, 'Programa de Recreacion y Salud Activa', 'Apoyo en actividades deportivas y recreativas para promover habitos saludables, control de participantes y dinamicas de integracion comunitaria.', 'Cancha Universitaria', NULL, 80, 0, NULL, 10, 0, 1, 13, 1, '2026-05-28 11:56:51', '2026-06-13 00:00:00', '2026-06-27 00:00:00', '07:30:00', '11:30:00'),
-(14, 'Jornada de Reforestacion y Limpieza Ambiental', 'Participacion en actividades de reforestacion, limpieza de zonas verdes, separacion de residuos y sensibilizacion ambiental en espacios comunitarios.', 'Parque Ecologico Municipal', NULL, 25, 1, '/uploads/ofertas/1780366010213-678613113.png', 20, 1, 1, NULL, 1, '2026-05-28 11:56:51', '2026-06-27 00:00:00', '2026-06-27 00:00:00', '08:00:00', '13:00:00');
+(14, 'Jornada de Reforestacion y Limpieza Ambiental', 'Participacion en actividades de reforestacion, limpieza de zonas verdes, separacion de residuos y sensibilizacion ambiental en espacios comunitarios.', 'Parque Ecologico Municipal', NULL, 25, 1, '/uploads/ofertas/1780366010213-678613113.png', 20, 0, 1, NULL, 1, '2026-05-28 11:56:51', '2026-06-27 00:00:00', '2026-06-27 00:00:00', '08:00:00', '13:00:00');
 
 -- =========================================
 -- 5. INSCRIPCIONES
 -- =========================================
 
-INSERT INTO `inscripciones` (`id_inscripcion`, `id_estudiante`, `id_oferta`, `fecha_inscripcion`, `estado`, `horas_acreditadas`, `fecha_acreditacion`) VALUES
-(1, 67, 14, '2026-06-02 19:27:30', 'finalizado', 25, '2026-06-02 19:30:27'),
-(2, 67, 7, '2026-06-02 19:27:33', 'finalizado', 100, '2026-06-02 19:27:50');
+-- Sin registros en inscripciones.
 
 -- =========================================
 -- 6. HORAS MANUALES ACREDITADAS
 -- =========================================
 
-INSERT INTO `horas_manuales_acreditadas` (`id_hora_manual`, `id_estudiante`, `horas`, `descripcion`, `fecha_acreditacion`) VALUES
-(1, 67, 250, 'Acreditacion manual', '2026-06-02 19:29:04'),
-(2, 67, 50, 'Acreditacion manual', '2026-06-02 19:29:17'),
-(3, 67, 75, 'Acreditacion manual', '2026-06-02 19:29:39');
+-- Sin registros en horas_manuales_acreditadas.
 
 SET FOREIGN_KEY_CHECKS = 1;
 

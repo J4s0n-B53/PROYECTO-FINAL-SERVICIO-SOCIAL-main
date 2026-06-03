@@ -220,6 +220,8 @@ export default function Login() {
               <div className="login-field">
                 <label>Correo institucional</label>
                 <input
+                  id="login-correo"
+                  name="correo"
                   type="email"
                   value={correo}
                   onChange={e => setCorreo(e.target.value)}
@@ -234,6 +236,8 @@ export default function Login() {
               <div className="login-field">
                 <label>Contraseña</label>
                 <input
+                  id="login-password"
+                  name="password"
                   type="password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}

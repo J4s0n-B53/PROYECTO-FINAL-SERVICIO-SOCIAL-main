@@ -49,7 +49,7 @@ async function inscribir(estudianteId, ofertaId) {
     await conn.beginTransaction();
 
     const [[estudiante]] = await conn.query(
-      `SELECT u.materias_aprobadas,
+      `SELECT u.materias_aprobadas, u.id_carrera,
               COALESCE(h.horas_no_ambientales, 0) + COALESCE(u.horas_manuales, 0) AS horas_no_ambientales,
               COALESCE(h.horas_ambientales, 0) AS horas_ambientales,
               LEAST(COALESCE(h.horas_no_ambientales, 0) + COALESCE(u.horas_manuales, 0), ?) + COALESCE(h.horas_ambientales, 0) AS horas_acumuladas
@@ -80,6 +80,8 @@ async function inscribir(estudianteId, ofertaId) {
     if (!oferta) throw { status: 404, message: 'Oferta no disponible' };
     if (oferta.cupo_actual >= oferta.cupo_maximo)
       throw { status: 409, message: 'Sin cupo disponible' };
+    if (oferta.id_carrera && oferta.id_carrera !== estudiante.id_carrera)
+      throw { status: 403, message: 'Esta oferta no corresponde a tu carrera' };
 
     if (!oferta.es_ambiental && (estudiante.horas_ambientales || 0) < META_AMBIENTAL) {
       const horasNoAmbientales = Number(estudiante.horas_no_ambientales || 0);

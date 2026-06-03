@@ -204,6 +204,7 @@ function toBoolean(value) {
 function TimeSelect({ value, onChange }) {
   return (
     <Input
+      name="hora-oferta"
       type="time"
       value={value || ''}
       onChange={e => onChange(e.target.value)}
@@ -258,6 +259,8 @@ function ImageDropField({ value, file, onFile, onUrlChange }) {
         }}
       >
         <input
+          id="oferta-imagen-archivo"
+          name="oferta-imagen-archivo"
           type="file"
           accept="image/*"
           onChange={e => pickFile(e.target.files?.[0])}
@@ -308,6 +311,7 @@ function ImageDropField({ value, file, onFile, onUrlChange }) {
 
       <div style={{ marginTop:10 }}>
         <Input
+          name="oferta-imagen-url"
           value={value}
           onChange={e => { onFile(null); onUrlChange(e.target.value); }}
           placeholder="O pega una URL de imagen..."
@@ -565,12 +569,16 @@ export default function Ofertas({ historial = false }) {
               color:'#8d97b8'
             }}>⌕</span>
             <input
+              id="ofertas-buscar"
+              name="ofertas-buscar"
               value={query} onChange={e=>setQuery(e.target.value)}
               placeholder="Buscar oferta..."
               style={{ width:'100%', background:'#fff', border:'1px solid rgba(10,27,78,.15)', borderRadius:8, padding:'9px 14px 9px 34px', fontFamily:'inherit', fontSize:13, color:'var(--text)', outline:'none', boxShadow:'0 1px 3px rgba(10,27,78,.06)' }}
             />
           </div>
           <select
+            id="ofertas-filtro-carrera"
+            name="ofertas-filtro-carrera"
             value={carreraFiltro}
             onChange={e => setCarreraFiltro(e.target.value)}
             style={{
@@ -592,6 +600,8 @@ export default function Ofertas({ historial = false }) {
           </select>
           {historial && (
             <input
+              id="ofertas-filtro-fecha-creacion"
+              name="ofertas-filtro-fecha-creacion"
               type="date"
               value={fechaCreacionFiltro}
               onChange={e => setFechaCreacionFiltro(e.target.value)}
@@ -665,14 +675,14 @@ export default function Ofertas({ historial = false }) {
           <Btn variant="accent"  onClick={saveOferta} disabled={saving}>{saving ? 'Guardando...' : 'Guardar'}</Btn>
         </>}
       >
-        <Field label="Título"><Input required value={form.titulo} onChange={e=>setForm({...form,titulo:e.target.value})} placeholder="Escribir título" /></Field>
-        <Field label="Descripción"><Textarea required value={form.descripcion} onChange={e=>setForm({...form,descripcion:e.target.value})} placeholder="Escribir descripción" /></Field>
+        <Field label="Título"><Input required name="oferta-titulo" value={form.titulo} onChange={e=>setForm({...form,titulo:e.target.value})} placeholder="Escribir título" /></Field>
+        <Field label="Descripción"><Textarea required name="oferta-descripcion" value={form.descripcion} onChange={e=>setForm({...form,descripcion:e.target.value})} placeholder="Escribir descripción" /></Field>
         <div style={{ display:'grid', gridTemplateColumns:'1fr', gap:12 }}>
-          <Field label="Ubicación"><Input required value={form.ubicacion} onChange={e=>setForm({...form,ubicacion:e.target.value})} placeholder="Escribir ubicación" /></Field>
+          <Field label="Ubicación"><Input required name="oferta-ubicacion" value={form.ubicacion} onChange={e=>setForm({...form,ubicacion:e.target.value})} placeholder="Escribir ubicación" /></Field>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-          <Field label="Fecha de inicio"><Input required type="date" value={form.fecha_inicio} onChange={e=>setForm({...form,fecha_inicio:e.target.value})} /></Field>
-          <Field label="Fecha de finalización"><Input required type="date" value={form.fecha_fin} onChange={e=>setForm({...form,fecha_fin:e.target.value})} /></Field>
+          <Field label="Fecha de inicio"><Input required name="oferta-fecha-inicio" type="date" value={form.fecha_inicio} onChange={e=>setForm({...form,fecha_inicio:e.target.value})} /></Field>
+          <Field label="Fecha de finalización"><Input required name="oferta-fecha-fin" type="date" value={form.fecha_fin} onChange={e=>setForm({...form,fecha_fin:e.target.value})} /></Field>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
           <Field label="Hora de inicio">
@@ -683,8 +693,8 @@ export default function Ofertas({ historial = false }) {
           </Field>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-          <Field label="Horas a acreditar"><Input required type="number" value={form.es_ambiental ? 25 : form.horas_acreditar} disabled={form.es_ambiental} onChange={e=>setForm({...form,horas_acreditar:+e.target.value})} min={1} max={500} /></Field>
-          <Field label="Cupo máximo"><Input required type="number" value={form.cupo_maximo} onChange={e=>setForm({...form,cupo_maximo:+e.target.value})} min={1} /></Field>
+          <Field label="Horas a acreditar"><Input required name="oferta-horas" type="number" value={form.es_ambiental ? 25 : form.horas_acreditar} disabled={form.es_ambiental} onChange={e=>setForm({...form,horas_acreditar:+e.target.value})} min={1} max={500} /></Field>
+          <Field label="Cupo máximo"><Input required name="oferta-cupo" type="number" value={form.cupo_maximo} onChange={e=>setForm({...form,cupo_maximo:+e.target.value})} min={1} /></Field>
         </div>
         <label style={{
           display:'flex',
@@ -696,6 +706,8 @@ export default function Ofertas({ historial = false }) {
           cursor:'pointer'
         }}>
           <input
+            id="oferta-es-ambiental"
+            name="oferta-es-ambiental"
             type="checkbox"
             checked={form.es_ambiental}
             onChange={e=>setForm({...form, es_ambiental:e.target.checked, horas_acreditar:e.target.checked ? 25 : form.horas_acreditar})}
@@ -703,7 +715,7 @@ export default function Ofertas({ historial = false }) {
           Actividad ambiental (25 horas obligatorias)
         </label>
         <Field label="Carrera">
-          <Select required value={form.id_carrera} onChange={e=>setForm({...form,id_carrera:e.target.value})}>
+          <Select required name="oferta-carrera" value={form.id_carrera} onChange={e=>setForm({...form,id_carrera:e.target.value})}>
             <option value="">Todas las carreras</option>
             {carreras.map(c => <option key={c.id_carrera} value={c.id_carrera}>{c.nombre_carrera}</option>)}
           </Select>
@@ -998,6 +1010,8 @@ function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onCambiarEsta
           color:'var(--text3)'
         }}>⌕</span>
         <input
+          id="inscritos-buscar-alumno"
+          name="inscritos-buscar-alumno"
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder="Buscar alumno..."
@@ -1085,6 +1099,8 @@ function AdminInscritosModal({ o, inscritos, onClose, onAcreditar, onCambiarEsta
                   ) : (
                     <>
                       <input
+                        id={`inscripcion-horas-${i.id_inscripcion}`}
+                        name={`inscripcion-horas-${i.id_inscripcion}`}
                         type="number"
                         min="0"
                         max={i.horas_oferta || o.horas_acreditar}

@@ -53,6 +53,8 @@ export default function Inscripciones() {
             color: '#8d97b8'
           }}>⌕</span>
           <input
+            id="inscripciones-buscar-estudiante"
+            name="inscripciones-buscar-estudiante"
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Buscar estudiante..."
@@ -71,6 +73,8 @@ export default function Inscripciones() {
         </div>
 
         <select
+          id="inscripciones-filtro-carrera"
+          name="inscripciones-filtro-carrera"
           value={carrera}
           onChange={e => setCarrera(e.target.value)}
           style={{
@@ -90,6 +94,8 @@ export default function Inscripciones() {
         </select>
 
         <select
+          id="inscripciones-filtro-estado"
+          name="inscripciones-filtro-estado"
           value={estado}
           onChange={e => setEstado(e.target.value)}
           style={{

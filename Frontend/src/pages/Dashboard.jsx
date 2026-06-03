@@ -288,6 +288,8 @@ export default function Dashboard() {
                 </svg>
               </span>
               <input
+                id="dashboard-buscar-finalizados"
+                name="dashboard-buscar-finalizados"
                 value={queryCompletos}
                 onChange={e => setQueryCompletos(e.target.value)}
                 placeholder="Buscar estudiante..."
@@ -306,6 +308,8 @@ export default function Dashboard() {
               />
             </div>
             <select
+              id="dashboard-carrera-finalizados"
+              name="dashboard-carrera-finalizados"
               value={carreraCompletos}
               onChange={e => setCarreraCompletos(e.target.value)}
               style={{

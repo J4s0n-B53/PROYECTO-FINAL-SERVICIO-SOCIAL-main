@@ -108,6 +108,8 @@ export default function Usuarios() {
             color:'var(--text3)'
           }}>⌕</span>
           <input
+            id="usuarios-buscar-estudiante"
+            name="usuarios-buscar-estudiante"
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Buscar estudiante..."
@@ -126,6 +128,8 @@ export default function Usuarios() {
           />
         </div>
         <select
+          id="usuarios-filtro-carrera"
+          name="usuarios-filtro-carrera"
           value={carreraFiltro}
           onChange={e => setCarreraFiltro(e.target.value)}
           style={{
@@ -144,6 +148,8 @@ export default function Usuarios() {
           {carreras.map(carrera => <option key={carrera} value={carrera}>{carrera}</option>)}
         </select>
         <select
+          id="usuarios-filtro-horas"
+          name="usuarios-filtro-horas"
           value={horasFiltro}
           onChange={e => setHorasFiltro(e.target.value)}
           style={{
@@ -203,6 +209,8 @@ export default function Usuarios() {
                 {esEstudiante ? (
                   <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
                     <input
+                      id={`usuarios-horas-manuales-${u.id_usuario}`}
+                      name={`usuarios-horas-manuales-${u.id_usuario}`}
                       type="number"
                       min="0"
                       max="500"

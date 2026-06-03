@@ -47,7 +47,7 @@ async function getAll() {
 
   const [rows] = await pool.query(
     `SELECT u.id_usuario, u.nombre_completo, u.correo_institucional,
-            u.rol, u.materias_aprobadas, u.horas_manuales, u.fecha_horas_manuales, u.created_at,
+            u.rol, u.materias_aprobadas, u.id_carrera, u.horas_manuales, u.fecha_horas_manuales, u.created_at,
             c.nombre_carrera, c.codigo_carrera, f.nombre_facultad,
             ${camposHorasAcumuladas()}
      FROM usuarios u

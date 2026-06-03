@@ -140,9 +140,25 @@ const inputStyle = {
   borderRadius: 8, padding: '10px 12px', fontFamily: 'inherit',
   fontSize: 13, color: 'var(--text)', outline: 'none'
 };
-export function Input(props) { return <input style={inputStyle} {...props} />; }
-export function Select({ children, ...props }) { return <select style={{ ...inputStyle, cursor:'pointer' }} {...props}>{children}</select>; }
-export function Textarea(props) { return <textarea style={{ ...inputStyle, resize:'vertical', minHeight:80 }} {...props} />; }
+function fieldIdentity(props, prefix) {
+  const reactId = useId();
+  const id = props.id || props.name || `${prefix}-${reactId.replace(/:/g, '')}`;
+  const name = props.name || id;
+  return { id, name };
+}
+
+export function Input(props) {
+  const identity = fieldIdentity(props, 'input');
+  return <input style={inputStyle} {...identity} {...props} />;
+}
+export function Select({ children, ...props }) {
+  const identity = fieldIdentity(props, 'select');
+  return <select style={{ ...inputStyle, cursor:'pointer' }} {...identity} {...props}>{children}</select>;
+}
+export function Textarea(props) {
+  const identity = fieldIdentity(props, 'textarea');
+  return <textarea style={{ ...inputStyle, resize:'vertical', minHeight:80 }} {...identity} {...props} />;
+}
 
 // ── CupoBar ────────────────────────────
 export function CupoBar({ actual, max }) {
@@ -159,7 +175,7 @@ export function CupoBar({ actual, max }) {
 }
 
 // ── Toast ──────────────────────────────
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 export function useToast() {
   const [toast, setToast] = useState(null);
   function show(msg, type = 'success') {
