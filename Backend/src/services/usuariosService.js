@@ -1,4 +1,5 @@
 const pool = require('../database/connection');
+const { syncAllStudentCareersFromEmail } = require('../utils/careerCode');
 const META_NO_AMBIENTAL_SIN_AMBIENTAL = 475;
 
 async function asegurarTablaHorasManuales(connection = pool) {
@@ -42,10 +43,12 @@ function joinsHoras() {
 }
 
 async function getAll() {
+  await syncAllStudentCareersFromEmail(pool);
+
   const [rows] = await pool.query(
     `SELECT u.id_usuario, u.nombre_completo, u.correo_institucional,
             u.rol, u.materias_aprobadas, u.horas_manuales, u.fecha_horas_manuales, u.created_at,
-            c.nombre_carrera, f.nombre_facultad,
+            c.nombre_carrera, c.codigo_carrera, f.nombre_facultad,
             ${camposHorasAcumuladas()}
      FROM usuarios u
      LEFT JOIN carreras   c ON u.id_carrera  = c.id_carrera
@@ -57,10 +60,12 @@ async function getAll() {
 }
 
 async function getMe(userId) {
+  await syncAllStudentCareersFromEmail(pool);
+
   const [rows] = await pool.query(
     `SELECT u.id_usuario, u.nombre_completo, u.correo_institucional,
             u.rol, u.materias_aprobadas, u.horas_manuales, u.fecha_horas_manuales, u.created_at,
-            c.id_carrera, c.nombre_carrera,
+            c.id_carrera, c.nombre_carrera, c.codigo_carrera,
             f.nombre_facultad,
             ${camposHorasAcumuladas()}
      FROM usuarios u
