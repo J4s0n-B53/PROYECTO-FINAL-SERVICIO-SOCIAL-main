@@ -1,10 +1,7 @@
 -- Base de presentacion del Sistema de Servicio Social Estudiantil
 -- Generado desde la base local SistemaServicioSocial el 2026-06-02 20:33:16
 -- Incluye facultades, carreras con codigo institucional, administrador, estudiantes y ofertas de presentacion.
--- Los correos institucionales de estudiantes usan iniciales de apellidos, anio de ingreso, codigo de carrera y correlativo.
--- El anio de ingreso varia segun el avance academico del estudiante.
--- Las contrasenas se almacenan con hash bcrypt.
--- No incluye inscripciones ni horas acreditadas para permitir pruebas nuevas.
+
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;

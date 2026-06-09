@@ -3,18 +3,18 @@ const inscripcionesController = require('../controllers/inscripcionesController'
 const { authMiddleware, adminOnly } = require('../middlewares/auth');
 
 // GET /api/inscripciones
-router.get('/',                authMiddleware,            inscripcionesController.getAll);
+router.get('/', authMiddleware, inscripcionesController.getAll);
 
 // POST /api/inscripciones
-router.post('/',               authMiddleware,            inscripcionesController.inscribir);
+router.post('/', authMiddleware, inscripcionesController.inscribir);
 
 // PATCH /api/inscripciones/:id/estado
-router.patch('/:id/estado',    authMiddleware, adminOnly, inscripcionesController.cambiarEstado);
+router.patch('/:id/estado',authMiddleware, adminOnly, inscripcionesController.cambiarEstado);
 
 // PATCH /api/inscripciones/:id/horas
-router.patch('/:id/horas',     authMiddleware, adminOnly, inscripcionesController.acreditarHoras);
+router.patch('/:id/horas', authMiddleware, adminOnly, inscripcionesController.acreditarHoras);
 
 // DELETE /api/inscripciones/:id
-router.delete('/:id',          authMiddleware,            inscripcionesController.eliminar);
+router.delete('/:id', authMiddleware, inscripcionesController.eliminar);
 
 module.exports = router;
