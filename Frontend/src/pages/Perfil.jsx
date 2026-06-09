@@ -24,7 +24,7 @@ function ProgressBar({ label, value, max, colorA, colorB }) {
   );
 }
 
-/* ── Generador PDF global — diseño constancia institucional ─────────────── */
+/* ── Generador PDF global — diseño constancia institucional ── */
 function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta, horasAmbientales = 0, metaAmbiental = 25, ambientalCumplido = false }) {
   const hoy    = new Date().toLocaleDateString('es-SV', { year: 'numeric', month: 'long', day: 'numeric' });
   const codigo = `USO-SS-GLOBAL-${e.id_usuario.toString().padStart(5, '0')}`;
@@ -160,7 +160,7 @@ function generarPDFGlobal({ estudiante: e, actividades, totalHoras, meta, horasA
   v.document.close();
 }
 
-/* ── Componente Perfil ───────────────────────────────────────────────────── */
+/* ── Componente Perfil ── */
 export default function Perfil() {
   const { user }  = useAuth();
   const [perfil,  setPerfil]  = useState(null);
@@ -243,7 +243,7 @@ export default function Perfil() {
           ))}
         </div>
 
-        {/* Progress bars */}
+        {/* Progress bar */}
         <ProgressBar label="Avance académico"                    value={perfil.materias_aprobadas} max={60}  colorA="#c066ff" colorB="#4f8cff" />
         <ProgressBar label="Horas de servicio social acreditadas" value={horasAcred}               max={META} colorA="#0fce8a" colorB="#0be0b8" />
         <ProgressBar label="Horas de servicio ambiental"          value={Math.min(horasAmbientales, META_AMBIENTAL)} max={META_AMBIENTAL} colorA="#2fb66d" colorB="#8ee08f" />

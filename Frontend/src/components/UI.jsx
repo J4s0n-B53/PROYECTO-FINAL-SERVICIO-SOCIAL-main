@@ -1,4 +1,4 @@
-// ── Badge ──────────────────────────────
+// ── Badge ──
 const BADGE_COLORS = {
   pendiente:  { bg: 'rgba(212,143,10,.12)',  color: '#a06b00' },
   aceptado:   { bg: 'rgba(15,158,110,.12)',  color: '#0a7a55' },
@@ -21,7 +21,7 @@ export function Badge({ type, children }) {
   );
 }
 
-// ── Tag ────────────────────────────────
+// ── Tag ──
 const TAG_COLORS = {
   blue:  { bg: 'rgba(10,27,78,.08)',   color: '#0A1B4E' },
   green: { bg: 'rgba(15,158,110,.10)', color: '#0a7a55' },
@@ -38,7 +38,7 @@ export function Tag({ color = 'gray', children }) {
   );
 }
 
-// ── Button ─────────────────────────────
+// ── Button ──
 export function Btn({ variant = 'outline', onClick, disabled, children, style }) {
   const variants = {
     accent:  { background: 'var(--accent)',  color: '#fff', border: '1px solid var(--accent)' },
@@ -57,7 +57,7 @@ export function Btn({ variant = 'outline', onClick, disabled, children, style })
   );
 }
 
-// ── StatCard ───────────────────────────
+// ── StatCard ──
 const STAT_COLORS = { blue:'var(--accent)', green:'var(--green)', amber:'var(--amber)', purple:'var(--purple)' };
 export function StatCard({ label, value, sub, color = 'blue' }) {
   return (
@@ -73,7 +73,7 @@ export function StatCard({ label, value, sub, color = 'blue' }) {
   );
 }
 
-// ── PageHeader ─────────────────────────
+// ── PageHeader ──
 export function PageHeader({ title, subtitle, titleStyle }) {
   return (
     <div className="fade-up" style={{ marginBottom: 28 }}>
@@ -83,7 +83,7 @@ export function PageHeader({ title, subtitle, titleStyle }) {
   );
 }
 
-// ── TableWrap ──────────────────────────
+// ── TableWrap ──
 export function TableWrap({ children }) {
   return (
     <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden', marginBottom: 28, boxShadow: '0 1px 4px rgba(10,27,78,.06)' }}>
@@ -100,7 +100,7 @@ export function Td({ children, style }) {
   return <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', color: 'var(--text2)', verticalAlign: 'middle', ...style }}>{children}</td>;
 }
 
-// ── Modal ──────────────────────────────
+// ── Modal ──
 export function Modal({ open, onClose, title, children, footer, width = 500 }) {
   if (!open) return null;
   return (
@@ -126,7 +126,7 @@ export function Modal({ open, onClose, title, children, footer, width = 500 }) {
   );
 }
 
-// ── Field ──────────────────────────────
+// ── Field ──
 export function Field({ label, children }) {
   const reactId = useId();
   const child = isValidElement(children) ? children : null;
@@ -165,7 +165,7 @@ export function Textarea(props) {
   return <textarea style={{ ...inputStyle, resize:'vertical', minHeight:80 }} {...identity} {...props} />;
 }
 
-// ── CupoBar ────────────────────────────
+// ── CupoBar ──
 export function CupoBar({ actual, max }) {
   const pct = max > 0 ? Math.round((actual / max) * 100) : 0;
   const color = pct > 80 ? 'var(--red)' : pct > 50 ? 'var(--amber)' : 'var(--green)';
@@ -179,7 +179,7 @@ export function CupoBar({ actual, max }) {
   );
 }
 
-// ── Toast ──────────────────────────────
+// ── Toast ──
 import { useState, useEffect, useId, isValidElement, cloneElement } from 'react';
 export function useToast() {
   const [toast, setToast] = useState(null);
@@ -207,7 +207,7 @@ export function Toast({ toast }) {
   );
 }
 
-// ── Spinner ────────────────────────────
+// ── Spinner ──
 export function Spinner() {
   return (
     <div style={{ display:'flex', justifyContent:'center', padding:'60px 0', color:'var(--text3)' }}>
@@ -216,7 +216,7 @@ export function Spinner() {
   );
 }
 
-// ── EmptyState ─────────────────────────
+// ── EmptyState ──
 export function EmptyState({ msg = 'Sin datos' }) {
   return (
     <div style={{ textAlign:'center', padding:'60px 20px', color:'var(--text3)', fontSize:14 }}>

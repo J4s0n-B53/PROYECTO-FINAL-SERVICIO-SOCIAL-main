@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 
 /**
- * Hook genérico para llamadas a la API con manejo de estado
- * @param {Function} fn - Función async que llama a la API
+  Hook genérico para llamadas a la API con manejo de estado
+  @param {Function} fn 
  */
 export function useApi(fn) {
   const [data,    setData]    = useState(null);
